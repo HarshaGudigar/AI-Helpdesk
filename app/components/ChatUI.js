@@ -22,6 +22,7 @@ export default function ChatUI() {
     maxTokens: 1000,
     systemPrompt: ''
   });
+  const [responseStartTime, setResponseStartTime] = useState(null);
 
   // Fetch knowledge base entries
   const fetchKnowledgeBase = async () => {
@@ -84,6 +85,10 @@ export default function ChatUI() {
     setInput('');
     setIsLoading(true);
     
+    // Record start time for response timing
+    const startTime = Date.now();
+    setResponseStartTime(startTime);
+    
     try {
       // Create a new AbortController
       const controller = new AbortController();
@@ -126,10 +131,24 @@ export default function ChatUI() {
             const data = JSON.parse(line);
             
             if (data.type === 'metadata') {
+              // Store the metadata and update the message with it
               metadata = {
                 source: data.source,
-                references: data.references
+                references: data.references,
+                debug: data.debug || {}
               };
+              
+              // Update the assistant message with the metadata
+              setMessages(prev => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage.role === 'assistant') {
+                  lastMessage.source = metadata.source;
+                  lastMessage.references = metadata.references;
+                  lastMessage.debug = metadata.debug;
+                }
+                return newMessages;
+              });
             } else if (data.type === 'content') {
               accumulatedContent += data.content;
               
@@ -139,18 +158,32 @@ export default function ChatUI() {
                 const lastMessage = newMessages[newMessages.length - 1];
                 if (lastMessage.role === 'assistant') {
                   lastMessage.content = accumulatedContent;
-                  lastMessage.source = metadata?.source;
-                  lastMessage.references = metadata?.references;
+                  // Preserve metadata if it exists
+                  if (metadata) {
+                    lastMessage.source = metadata.source;
+                    lastMessage.references = metadata.references;
+                    lastMessage.debug = metadata.debug;
+                  }
                 }
                 return newMessages;
               });
             } else if (data.type === 'done') {
-              // Remove the streaming flag when done
+              // Calculate response time
+              const responseTime = Date.now() - startTime;
+              
+              // Remove the streaming flag when done and add metadata
               setMessages(prev => {
                 const newMessages = [...prev];
                 const lastMessage = newMessages[newMessages.length - 1];
                 if (lastMessage.role === 'assistant') {
                   lastMessage.isStreaming = false;
+                  lastMessage.responseTime = responseTime;
+                  // Make sure debug exists
+                  if (!lastMessage.debug) {
+                    lastMessage.debug = {};
+                  }
+                  // Add response time to debug
+                  lastMessage.debug.responseTime = responseTime;
                 }
                 return newMessages;
               });
@@ -171,6 +204,7 @@ export default function ChatUI() {
       }]);
     } finally {
       setIsLoading(false);
+      setResponseStartTime(null);
     }
   };
 
@@ -793,6 +827,45 @@ export default function ChatUI() {
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    )}
+                    
+                    {/* Response metadata section */}
+                    {message.role === 'assistant' && !message.isStreaming && (
+                      <div style={{ 
+                        marginTop: '12px',
+                        paddingTop: '8px',
+                        borderTop: '1px dashed #e9ecef',
+                        fontSize: '11px',
+                        color: '#adb5bd',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px'
+                      }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Model:</span> 
+                          {message.debug?.model || 'unknown'}
+                        </span>
+                        
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Time:</span> 
+                          {message.responseTime ? (message.responseTime / 1000).toFixed(2) + 's' : '0.00s'}
+                        </span>
+                        
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Tokens:</span> 
+                          {message.debug?.tokenCount || 0}
+                        </span>
+                        
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Sources:</span> 
+                          {message.debug?.usedReferencesCount || 0}
+                        </span>
+                        
+                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Results:</span> 
+                          {message.debug?.resultsCount || 0}
+                        </span>
                       </div>
                     )}
                   </div>

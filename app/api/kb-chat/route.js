@@ -24,7 +24,11 @@ export async function POST(request) {
         references: [],
         debug: {
           query: message,
-          isPredefined: true
+          isPredefined: true,
+          model: config?.model || 'gemma3:1b',
+          tokenCount: estimateTokenCount(predefinedResponse),
+          resultsCount: 0,
+          usedReferencesCount: 0
         }
       });
     }
@@ -95,10 +99,7 @@ ${context}`;
       const response = await axios.post('http://localhost:11434/api/chat', {
         model: config?.model || 'gemma3:1b',
         messages: [
-          { 
-            role: 'system', 
-            content: systemPrompt
-          },
+          { role: 'system', content: systemPrompt },
           ...history,
           { role: 'user', content: message }
         ],
@@ -109,6 +110,9 @@ ${context}`;
           max_tokens: config?.maxTokens || 1000
         }
       });
+      
+      // Get the actual model used from the response
+      const modelUsed = response.data.model || config?.model || 'gemma3:1b';
       
       // Check if the response contains information not in the knowledge base
       const responseContent = response.data.message.content;
@@ -125,7 +129,9 @@ ${context}`;
             query: message,
             resultsCount: kbResults.length,
             hasRelevantInfo: false, // Override to false since the model says it has no info
-            keyTerms: queryTerms
+            keyTerms: queryTerms,
+            model: modelUsed,
+            tokenCount: estimateTokenCount(responseContent)
           }
         });
       }
@@ -150,7 +156,8 @@ ${context}`;
             snippet: r.snippet.substring(0, 100) + '...'
           })),
           usedReferencesCount: usedReferences.length,
-          model: config?.model || 'gemma3:1b'
+          model: modelUsed,
+          tokenCount: estimateTokenCount(responseContent)
         }
       });
     } else {
@@ -163,7 +170,10 @@ ${context}`;
           query: message,
           resultsCount: kbResults.length,
           hasRelevantInfo: hasRelevantInfo,
-          keyTerms: queryTerms
+          keyTerms: queryTerms,
+          model: config?.model || 'gemma3:1b',
+          tokenCount: estimateTokenCount("I don't have that information in my knowledge base."),
+          usedReferencesCount: 0
         }
       });
     }
@@ -440,4 +450,11 @@ function getPredefinedContent(query) {
   }
   
   return null;
+}
+
+// Add a function to estimate token count
+function estimateTokenCount(text) {
+  if (!text) return 0;
+  // A simple estimation: roughly 4 characters per token for English text
+  return Math.ceil(text.length / 4);
 } 

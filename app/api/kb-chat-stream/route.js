@@ -22,6 +22,12 @@ export async function POST(request) {
         if (predefinedResponse) {
           console.log('Using predefined response for query:', message);
           
+          // Calculate token count for the predefined response
+          const tokenCount = estimateTokenCount(predefinedResponse);
+          
+          // Get the model name from config
+          const modelName = config?.model || 'gemma3:1b';
+          
           // Send metadata
           const metadataChunk = JSON.stringify({ 
             type: 'metadata',
@@ -30,7 +36,10 @@ export async function POST(request) {
             debug: {
               query: message,
               isPredefined: true,
-              model: config?.model || 'gemma3:1b'
+              model: modelName,
+              tokenCount: tokenCount,
+              resultsCount: 0,
+              usedReferencesCount: 0
             }
           });
           controller.enqueue(encoder.encode(metadataChunk + '\n'));
@@ -127,6 +136,9 @@ ${context}`;
               resultsCount: kbResults.length,
               hasRelevantInfo: hasRelevantInfo,
               keyTerms: queryTerms,
+              model: config?.model || 'gemma3:1b',
+              tokenCount: 0, // Initial token count, will be updated
+              usedReferencesCount: 0, // Initial count, will be updated
               topResults: kbResults.slice(0, 3).map(r => ({ 
                 title: r.title, 
                 relevance: r.relevance,
@@ -150,7 +162,7 @@ ${context}`;
             console.log('Ollama is running:', healthCheck.data);
             
             const response = await axios.post('http://localhost:11434/api/chat', {
-              model: 'gemma3:1b',
+              model: config?.model || 'gemma3:1b',
               messages: [
                 { role: 'system', content: systemPrompt },
                 ...history,
@@ -158,8 +170,9 @@ ${context}`;
               ],
               stream: true,
               options: {
-                temperature: 0.1, // Lower temperature for more focused responses
-                top_p: 0.9
+                temperature: config?.temperature || 0.1,
+                top_p: config?.topP || 0.9,
+                max_tokens: config?.maxTokens || 1000
               }
             }, {
               responseType: 'stream'
@@ -167,6 +180,7 @@ ${context}`;
 
             // Process the streaming response
             let accumulatedResponse = '';
+            let modelName = '';
             
             response.data.on('data', (chunk) => {
               try {
@@ -175,58 +189,73 @@ ${context}`;
                 for (const line of lines) {
                   const data = JSON.parse(line);
                   
+                  // Extract the actual model name from the first response chunk
+                  if (!modelName && data.model) {
+                    modelName = data.model;
+                  }
+                  
                   if (data.message?.content) {
                     accumulatedResponse += data.message.content;
+                    const currentTokenCount = estimateTokenCount(accumulatedResponse);
                     
                     // Check if the response indicates no information
                     const lowerResponse = accumulatedResponse.toLowerCase();
                     const noInfoPhrases = ["don't have that information", "i don't have", "no information"];
                     const hasNoInfo = noInfoPhrases.some(phrase => lowerResponse.includes(phrase));
                     
-                    if (hasNoInfo) {
-                      // Update metadata to indicate no information
-                      const updatedMetadata = JSON.stringify({
-                        type: 'metadata',
-                        source: 'no_information',
-                        references: [], // Empty references for "no information" responses
-                        debug: {
-                          query: message,
-                          resultsCount: kbResults.length,
-                          hasRelevantInfo: false,
-                          keyTerms: queryTerms
-                        }
-                      });
-                      controller.enqueue(encoder.encode(updatedMetadata + '\n'));
-                    } else if (data.done) {
-                      // If this is the final chunk and it's not a "no information" response,
-                      // filter references to only include those used in the response
-                      const usedReferences = filterUsedReferences(kbResults, accumulatedResponse);
-                      
-                      // Update metadata with filtered references
-                      const updatedMetadata = JSON.stringify({
-                        type: 'metadata',
-                        source: 'knowledge_base',
-                        references: usedReferences.map(r => ({ title: r.title, url: r.url })),
-                        debug: {
-                          query: message,
-                          resultsCount: kbResults.length,
-                          hasRelevantInfo: true,
-                          keyTerms: queryTerms,
-                          usedReferencesCount: usedReferences.length
-                        }
-                      });
-                      controller.enqueue(encoder.encode(updatedMetadata + '\n'));
-                    }
+                    // Calculate used references with each chunk
+                    const usedReferences = hasNoInfo ? [] : filterUsedReferences(kbResults, accumulatedResponse);
                     
+                    // Send updated metadata with each content chunk to ensure token count and sources are current
+                    const updatedMetadata = JSON.stringify({
+                      type: 'metadata',
+                      source: hasNoInfo ? 'no_information' : 'knowledge_base',
+                      references: usedReferences.map(r => ({ title: r.title, url: r.url })),
+                      debug: {
+                        query: message,
+                        resultsCount: kbResults.length,
+                        hasRelevantInfo: !hasNoInfo,
+                        keyTerms: queryTerms,
+                        model: modelName || config?.model || 'gemma3:1b',
+                        tokenCount: currentTokenCount,
+                        usedReferencesCount: usedReferences.length
+                      }
+                    });
+                    controller.enqueue(encoder.encode(updatedMetadata + '\n'));
+                    
+                    // Send the content chunk
                     const contentChunk = JSON.stringify({
                       type: 'content',
                       content: data.message.content
                     });
                     controller.enqueue(encoder.encode(contentChunk + '\n'));
-                  }
-                  
-                  // If done, close the stream
-                  if (data.done) {
+                    
+                    // If this is the final chunk, send a more complete metadata update
+                    if (data.done) {
+                      // Final metadata update with complete information
+                      const finalMetadata = JSON.stringify({
+                        type: 'metadata',
+                        source: hasNoInfo ? 'no_information' : 'knowledge_base',
+                        references: usedReferences.map(r => ({ title: r.title, url: r.url })),
+                        debug: {
+                          query: message,
+                          resultsCount: kbResults.length,
+                          hasRelevantInfo: !hasNoInfo,
+                          keyTerms: queryTerms,
+                          usedReferencesCount: usedReferences.length,
+                          model: modelName || config?.model || 'gemma3:1b',
+                          tokenCount: currentTokenCount
+                        }
+                      });
+                      controller.enqueue(encoder.encode(finalMetadata + '\n'));
+                      
+                      // Close the stream
+                      const doneChunk = JSON.stringify({ type: 'done' });
+                      controller.enqueue(encoder.encode(doneChunk + '\n'));
+                      controller.close();
+                    }
+                  } else if (data.done) {
+                    // If there's a done message without content, close the stream
                     const doneChunk = JSON.stringify({ type: 'done' });
                     controller.enqueue(encoder.encode(doneChunk + '\n'));
                     controller.close();
@@ -277,7 +306,10 @@ ${context}`;
               query: message,
               resultsCount: kbResults.length,
               hasRelevantInfo: hasRelevantInfo,
-              keyTerms: queryTerms
+              keyTerms: queryTerms,
+              model: config?.model || 'gemma3:1b',
+              tokenCount: estimateTokenCount("I don't have that information in my knowledge base."),
+              usedReferencesCount: 0
             }
           });
           controller.enqueue(encoder.encode(metadataChunk + '\n'));
@@ -465,7 +497,7 @@ function filterUsedReferences(allReferences, responseContent) {
   
   const lowerResponse = responseContent.toLowerCase();
   
-  // Improved title matching: require exact title match or multiple words from the title
+  // First check: Look for title mentions
   const titleMentionedRefs = allReferences.filter(ref => {
     // Check for exact title match (case insensitive)
     const titleLower = ref.title.toLowerCase();
@@ -474,32 +506,49 @@ function filterUsedReferences(allReferences, responseContent) {
     }
     
     // Extract meaningful words from title (length > 3, not common words)
-    const commonWords = ['the', 'and', 'for', 'with'];
+    const commonWords = ['the', 'and', 'for', 'with', 'about', 'what', 'who', 'how', 'when', 'where'];
     const titleWords = titleLower.split(/\s+/).filter(w => 
       w.length > 3 && !commonWords.includes(w)
     );
     
     // Count how many title words appear in the response
     const matchCount = titleWords.filter(word => lowerResponse.includes(word)).length;
-    return matchCount >= 2 && matchCount >= titleWords.length * 0.5; // At least 2 words and 50% of title words
+    return matchCount >= 1 && matchCount >= titleWords.length * 0.3; // More lenient: at least 1 word and 30% of title words
   });
   
   if (titleMentionedRefs.length > 0) {
     return titleMentionedRefs;
   }
   
-  // Refine content matching with higher threshold
+  // Second check: Look for content matches with more lenient threshold
   const contentMatchedRefs = allReferences.filter(ref => {
     const keyPhrases = extractKeyPhrases(ref.snippet);
     const matchCount = keyPhrases.filter(phrase => 
       lowerResponse.includes(phrase.toLowerCase())
     ).length;
-    const minMatches = Math.max(3, Math.floor(keyPhrases.length * 0.25)); // Increase threshold
+    
+    // More lenient threshold based on response length
+    const responseWordCount = lowerResponse.split(/\s+/).length;
+    const minMatches = responseWordCount < 50 ? 1 : Math.max(2, Math.floor(keyPhrases.length * 0.15));
+    
     return matchCount >= minMatches;
   });
   
   if (contentMatchedRefs.length > 0) {
     return contentMatchedRefs;
+  }
+  
+  // Third check: If we still have no matches but have a substantial response,
+  // return the top reference if it's likely to be relevant
+  if (responseContent.length > 100 && allReferences.length > 0) {
+    // Check if any significant words from the top reference appear in the response
+    const topRef = allReferences[0];
+    const significantWords = extractKeyTerms(topRef.snippet);
+    const matchCount = significantWords.filter(word => lowerResponse.includes(word)).length;
+    
+    if (matchCount >= 2 || (matchCount >= 1 && significantWords.length <= 5)) {
+      return [topRef];
+    }
   }
   
   return [];
@@ -573,4 +622,11 @@ function getPredefinedContent(query) {
   }
   
   return null;
+}
+
+// Add a function to estimate token count
+function estimateTokenCount(text) {
+  if (!text) return 0;
+  // A simple estimation: roughly 4 characters per token for English text
+  return Math.ceil(text.length / 4);
 } 
