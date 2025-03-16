@@ -856,16 +856,6 @@ export default function ChatUI() {
                           <span style={{ fontWeight: '500', marginRight: '4px' }}>Tokens:</span> 
                           {message.debug?.tokenCount || 0}
                         </span>
-                        
-                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Sources:</span> 
-                          {message.debug?.usedReferencesCount || 0}
-                        </span>
-                        
-                        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                          <span style={{ fontWeight: '500', marginRight: '4px' }}>Results:</span> 
-                          {message.debug?.resultsCount || 0}
-                        </span>
                       </div>
                     )}
                   </div>
