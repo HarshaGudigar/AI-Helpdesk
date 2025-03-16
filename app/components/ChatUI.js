@@ -288,6 +288,14 @@ export default function ChatUI() {
         // Italic: *text* -> <em>text</em> (but not if it's part of a bold pattern)
         formatted = formatted.replace(/\*([^*]*?)\*/g, '<em>$1</em>');
         
+        // Format URLs: [text](url) or raw URLs like https://example.com
+        formatted = formatted.replace(/\[(https?:\/\/[^\s\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, 
+          '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: none; font-weight: medium; border-bottom: 1px solid #0066cc;">$1</a>');
+        
+        // Format raw URLs
+        formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, 
+          '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: none; font-weight: medium; border-bottom: 1px solid #0066cc;">$1</a>');
+        
         // Lists: lines starting with "* " or "- "
         const lines = formatted.split('\n');
         let inList = false;
@@ -553,7 +561,12 @@ export default function ChatUI() {
                               href={ref.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              style={{ color: 'blue', textDecoration: 'none' }}
+                              style={{ 
+                                color: '#0066cc', 
+                                textDecoration: 'none',
+                                fontWeight: 'medium',
+                                borderBottom: '1px solid #0066cc'
+                              }}
                             >
                               {ref.title}
                             </a>

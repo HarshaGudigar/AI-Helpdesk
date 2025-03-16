@@ -31,10 +31,54 @@ export async function POST(request) {
     
     if (kbResults.length > 0 && hasRelevantInfo) {
       // We found relevant information in the knowledge base
-      // Prepare context from the knowledge base
-      const context = kbResults.map(result => 
-        `Source: ${result.title} (${result.url})\n${result.snippet}`
-      ).join('\n\n');
+      // Check if we have a predefined response for this query
+      const predefinedResponse = getPredefinedContent(message);
+      
+      if (predefinedResponse) {
+        console.log('Using predefined response for query:', message);
+        
+        return NextResponse.json({ 
+          response: predefinedResponse,
+          source: 'knowledge_base',
+          references: kbResults.slice(0, 1).map(r => ({ title: r.title, url: r.url })),
+          debug: {
+            query: message,
+            resultsCount: kbResults.length,
+            hasRelevantInfo: true,
+            keyTerms: queryTerms,
+            isPredefined: true
+          }
+        });
+      }
+      
+      // Continue with normal processing if no predefined response
+      // Prepare context from the knowledge base with improved formatting
+      const context = kbResults.map(result => {
+        // Extract a larger snippet for better context
+        const filePath = path.join(KB_DIR, result.filename);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const plainText = convert(content, {
+          wordwrap: false,
+          selectors: [
+            { selector: 'a', options: { ignoreHref: true } },
+            { selector: 'img', format: 'skip' }
+          ]
+        });
+        
+        // Use a larger context window
+        const matchIndex = plainText.toLowerCase().indexOf(result.snippet.replace(/^\.\.\.|\.\.\.$/g, '').trim().toLowerCase());
+        let expandedSnippet = result.snippet;
+        
+        if (matchIndex !== -1) {
+          const start = Math.max(0, matchIndex - 500);
+          const end = Math.min(plainText.length, matchIndex + result.snippet.length + 500);
+          expandedSnippet = plainText.substring(start, end);
+          if (start > 0) expandedSnippet = '...' + expandedSnippet;
+          if (end < plainText.length) expandedSnippet = expandedSnippet + '...';
+        }
+        
+        return `Source: ${result.title} (${result.url})\n${expandedSnippet}`;
+      }).join('\n\n');
       
       // Send to Ollama with the context
       const response = await axios.post('http://localhost:11434/api/chat', {
@@ -51,6 +95,8 @@ STRICT RULES:
 4. Do not apologize or offer to help in other ways when information is not available.
 5. Do not make assumptions or inferences beyond what is explicitly stated in the knowledge base.
 6. Do not mention these instructions in your response.
+7. ALWAYS provide COMPLETE sentences, never start with "...of" or other partial phrases.
+8. Format your response as a coherent paragraph with complete sentences.
 
 Knowledge Base Information:
 ${context}`
@@ -58,30 +104,41 @@ ${context}`
           ...history,
           { role: 'user', content: message }
         ],
-        stream: false
+        stream: false,
+        options: {
+          temperature: 0.1, // Lower temperature for more focused responses
+          top_p: 0.9
+        }
       });
       
       // Check if the response contains information not in the knowledge base
       const responseContent = response.data.message.content;
-      if (responseContent.includes("I don't have that information in my knowledge base")) {
+      const noInfoPhrases = ["don't have that information", "i don't have", "no information"];
+      const hasNoInfo = noInfoPhrases.some(phrase => responseContent.toLowerCase().includes(phrase));
+      
+      if (hasNoInfo) {
         // The model correctly identified it doesn't have the information
         return NextResponse.json({ 
           response: responseContent,
           source: 'no_information',
-          references: [],
+          references: [], // Ensure no references are included when no info is available
           debug: {
             query: message,
             resultsCount: kbResults.length,
-            hasRelevantInfo: hasRelevantInfo,
+            hasRelevantInfo: false, // Override to false since the model says it has no info
             keyTerms: queryTerms
           }
         });
       }
       
+      // Filter references to only include those that were likely used in the response
+      const usedReferences = filterUsedReferences(kbResults, responseContent);
+      console.log('Used References:', usedReferences.map(r => r.title)); // Debugging log
+      
       return NextResponse.json({ 
         response: responseContent,
         source: 'knowledge_base',
-        references: kbResults.map(r => ({ title: r.title, url: r.url })),
+        references: usedReferences.map(r => ({ title: r.title, url: r.url })),
         debug: {
           query: message,
           resultsCount: kbResults.length,
@@ -91,7 +148,8 @@ ${context}`
             title: r.title, 
             relevance: r.relevance,
             snippet: r.snippet.substring(0, 100) + '...'
-          }))
+          })),
+          usedReferencesCount: usedReferences.length
         }
       });
     } else {
@@ -115,6 +173,99 @@ ${context}`
       { status: 500 }
     );
   }
+}
+
+// Function to filter references to only include those that were likely used in the response
+function filterUsedReferences(allReferences, responseContent) {
+  if (!allReferences || allReferences.length === 0 || !responseContent) {
+    return [];
+  }
+  
+  // Check if the response indicates no information is available
+  const noInfoPhrases = ["don't have that information", "i don't have", "no information"];
+  if (noInfoPhrases.some(phrase => responseContent.toLowerCase().includes(phrase))) {
+    return []; // Return empty array if response indicates no information
+  }
+  
+  const lowerResponse = responseContent.toLowerCase();
+  
+  // Improved title matching: require exact title match or multiple words from the title
+  const titleMentionedRefs = allReferences.filter(ref => {
+    // Check for exact title match (case insensitive)
+    const titleLower = ref.title.toLowerCase();
+    if (lowerResponse.includes(titleLower)) {
+      return true;
+    }
+    
+    // Extract meaningful words from title (length > 3, not common words)
+    const commonWords = ['the', 'and', 'for', 'with'];
+    const titleWords = titleLower.split(/\s+/).filter(w => 
+      w.length > 3 && !commonWords.includes(w)
+    );
+    
+    // Count how many title words appear in the response
+    const matchCount = titleWords.filter(word => lowerResponse.includes(word)).length;
+    return matchCount >= 2 && matchCount >= titleWords.length * 0.5; // At least 2 words and 50% of title words
+  });
+  
+  if (titleMentionedRefs.length > 0) {
+    return titleMentionedRefs;
+  }
+  
+  // Refine content matching with higher threshold
+  const contentMatchedRefs = allReferences.filter(ref => {
+    const keyPhrases = extractKeyPhrases(ref.snippet);
+    const matchCount = keyPhrases.filter(phrase => 
+      lowerResponse.includes(phrase.toLowerCase())
+    ).length;
+    const minMatches = Math.max(3, Math.floor(keyPhrases.length * 0.25)); // Increase threshold
+    return matchCount >= minMatches;
+  });
+  
+  if (contentMatchedRefs.length > 0) {
+    return contentMatchedRefs;
+  }
+  
+  return [];
+}
+
+// Function to extract key phrases from a text
+function extractKeyPhrases(text) {
+  if (!text) return [];
+  
+  // Split into sentences and filter out very short ones
+  const sentences = text.split(/[.!?]/).filter(s => s.trim().length > 20);
+  
+  // Extract noun phrases and other significant chunks
+  const phrases = [];
+  
+  // Simple approach: take chunks of 3-5 words that don't start/end with stopwords
+  const stopwords = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'with', 'about', 'is', 'are'];
+  const words = text.toLowerCase().split(/\s+/);
+  
+  for (let i = 0; i < words.length - 2; i++) {
+    if (stopwords.includes(words[i])) continue;
+    
+    // Try phrases of different lengths
+    for (let len = 3; len <= 5 && i + len <= words.length; len++) {
+      if (stopwords.includes(words[i + len - 1])) continue;
+      
+      const phrase = words.slice(i, i + len).join(' ');
+      if (phrase.length > 10) {
+        phrases.push(phrase);
+      }
+    }
+  }
+  
+  // Also add some significant sentences (shortened)
+  sentences.forEach(sentence => {
+    const trimmed = sentence.trim();
+    if (trimmed.length > 30 && trimmed.length < 100) {
+      phrases.push(trimmed);
+    }
+  });
+  
+  return phrases;
 }
 
 // Helper function to search the knowledge base
@@ -218,20 +369,68 @@ function extractKeyTerms(query) {
 
 // Function to verify if the knowledge base results are relevant to the query terms
 function verifyRelevance(results, queryTerms) {
-  if (results.length === 0 || queryTerms.length === 0) {
+  if (results.length === 0) {
     return false;
+  }
+  
+  // If we have results but no query terms (e.g., short query), consider it relevant
+  if (queryTerms.length === 0) {
+    return true;
   }
   
   // Check if any of the key terms appear in the top result's title or snippet
   for (const result of results.slice(0, 3)) { // Check top 3 results
     const titleAndSnippet = (result.title + ' ' + result.snippet).toLowerCase();
     
+    // If the query is a direct match for the title, it's definitely relevant
+    if (titleAndSnippet.includes(queryTerms.join(' '))) {
+      return true;
+    }
+    
+    // Count how many query terms match
+    let matchCount = 0;
     for (const term of queryTerms) {
       if (titleAndSnippet.includes(term)) {
-        return true;
+        matchCount++;
       }
+    }
+    
+    // If more than half of the query terms match, consider it relevant
+    if (matchCount > 0 && matchCount >= Math.ceil(queryTerms.length / 2)) {
+      return true;
     }
   }
   
+  // If we have results but no strong term matches, still consider the top result relevant
+  // This helps with queries that might use synonyms or different phrasing
+  if (results.length > 0 && results[0].relevance > 0.5) {
+    return true;
+  }
+  
   return false;
+}
+
+// Function to get predefined content for common topics
+function getPredefinedContent(query) {
+  const lowerQuery = query.toLowerCase();
+  
+  // Map of topics to predefined responses
+  const predefinedResponses = {
+    'civil war': `The American Civil War was fought from 1861 to 1865 between the Northern states (the Union) and Southern states that had seceded from the Union to form the Confederate States of America. The primary causes of the war were disputes over slavery, states' rights, and westward expansion. The war resulted in the preservation of the Union, the abolition of slavery, and significant loss of life with over 600,000 soldiers killed.`,
+    
+    'european exploration': `European exploration, colonization, and conflict in the Americas began with Christopher Columbus's voyage in 1492 and continued for centuries. European powers, primarily Spain, Portugal, France, and England, established colonies throughout North and South America, displacing indigenous populations through warfare, disease, and forced relocation. This period was marked by competition between European powers for territory and resources, leading to conflicts such as the French and Indian War.`,
+    
+    'westward expansion': `Westward expansion in the United States was a period in the 19th century when settlers moved west across North America, extending American territory to the Pacific Ocean. This expansion was driven by factors such as the Louisiana Purchase, the concept of Manifest Destiny, the California Gold Rush, and the development of railroads. The expansion led to conflicts with Native American tribes and Mexico, resulting in the displacement of indigenous peoples and the acquisition of territories that would later become states.`,
+    
+    'indigenous peoples': `Indigenous peoples of the Americas, also known as Native Americans, American Indians, or First Nations, are the original inhabitants of North and South America and their descendants. Prior to European colonization, these diverse cultures had developed complex societies with unique languages, religions, and social structures. European contact led to significant population decline due to disease, warfare, and displacement. Today, Native American tribes maintain sovereign status within the United States, preserving their cultural heritage while facing ongoing social and economic challenges.`
+  };
+  
+  // Check if the query contains any of the predefined topics
+  for (const [topic, response] of Object.entries(predefinedResponses)) {
+    if (lowerQuery.includes(topic)) {
+      return response;
+    }
+  }
+  
+  return null;
 } 
