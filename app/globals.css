@@ -134,4 +134,14 @@ button {
     border-radius: 12px !important; /* Keep border radius */
     box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; /* Keep shadow */
   }
+}
+
+/* Add animation for the config panel slide-in effect */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 } 

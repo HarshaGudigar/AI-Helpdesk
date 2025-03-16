@@ -8,7 +8,7 @@ import { convert } from 'html-to-text';
 const KB_DIR = path.join(process.cwd(), 'knowledge-base');
 
 export async function POST(request) {
-  const { message, history } = await request.json();
+  const { message, history, config } = await request.json();
   
   // Set up streaming response
   const encoder = new TextEncoder();
@@ -55,7 +55,8 @@ export async function POST(request) {
                 resultsCount: kbResults.length,
                 hasRelevantInfo: true,
                 keyTerms: queryTerms,
-                isPredefined: true
+                isPredefined: true,
+                model: config?.model || 'gemma3:1b'
               }
             });
             controller.enqueue(encoder.encode(metadataChunk + '\n'));
@@ -103,7 +104,8 @@ export async function POST(request) {
             return `Source: ${result.title} (${result.url})\n${expandedSnippet}`;
           }).join('\n\n');
           
-          systemPrompt = `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
+          // Get system prompt from config or use default
+          systemPrompt = config?.systemPrompt || `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
 
 STRICT RULES:
 1. NEVER use your general knowledge to answer questions.
@@ -130,6 +132,7 @@ ${context}`;
               resultsCount: kbResults.length,
               hasRelevantInfo: hasRelevantInfo,
               keyTerms: queryTerms,
+              model: config?.model || 'gemma3:1b',
               topResults: kbResults.slice(0, 3).map(r => ({ 
                 title: r.title, 
                 relevance: r.relevance,
@@ -153,7 +156,7 @@ ${context}`;
             console.log('Ollama is running:', healthCheck.data);
             
             const response = await axios.post('http://localhost:11434/api/chat', {
-              model: 'gemma3:1b',
+              model: config?.model || 'gemma3:1b',
               messages: [
                 { role: 'system', content: systemPrompt },
                 ...history,
@@ -161,8 +164,9 @@ ${context}`;
               ],
               stream: true,
               options: {
-                temperature: 0.1, // Lower temperature for more focused responses
-                top_p: 0.9
+                temperature: config?.temperature || 0.1,
+                top_p: config?.topP || 0.9,
+                max_tokens: config?.maxTokens || 1000
               }
             }, {
               responseType: 'stream'
@@ -196,7 +200,8 @@ ${context}`;
                           query: message,
                           resultsCount: kbResults.length,
                           hasRelevantInfo: false,
-                          keyTerms: queryTerms
+                          keyTerms: queryTerms,
+                          model: config?.model || 'gemma3:1b'
                         }
                       });
                       controller.enqueue(encoder.encode(updatedMetadata + '\n'));
@@ -215,7 +220,8 @@ ${context}`;
                           resultsCount: kbResults.length,
                           hasRelevantInfo: true,
                           keyTerms: queryTerms,
-                          usedReferencesCount: usedReferences.length
+                          usedReferencesCount: usedReferences.length,
+                          model: config?.model || 'gemma3:1b'
                         }
                       });
                       controller.enqueue(encoder.encode(updatedMetadata + '\n'));

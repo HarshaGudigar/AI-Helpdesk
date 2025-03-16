@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Plus, Loader2, Database, Bot, Trash2 } from 'lucide-react';
+import { Send, Plus, Loader2, Database, Bot, Trash2, Settings } from 'lucide-react';
+import ConfigPanel from './ConfigPanel';
 
 export default function ChatUI() {
   const [messages, setMessages] = useState([]);
@@ -13,6 +14,14 @@ export default function ChatUI() {
   const [isAddingUrl, setIsAddingUrl] = useState(false);
   const messagesEndRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [modelConfig, setModelConfig] = useState({
+    model: 'gemma3:1b',
+    temperature: 0.1,
+    topP: 0.9,
+    maxTokens: 1000,
+    systemPrompt: ''
+  });
 
   // Fetch knowledge base entries
   const fetchKnowledgeBase = async () => {
@@ -51,6 +60,18 @@ export default function ChatUI() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Load config from localStorage on initial render
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('aiHelpdeskConfig');
+    if (savedConfig) {
+      try {
+        setModelConfig(JSON.parse(savedConfig));
+      } catch (error) {
+        console.error('Error parsing saved config:', error);
+      }
+    }
+  }, []);
+
   // Handle sending a message
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -70,13 +91,14 @@ export default function ChatUI() {
       // Add a temporary assistant message that will be updated as we receive chunks
       setMessages(prev => [...prev, { role: 'assistant', content: '', isStreaming: true }]);
       
-      // Make the streaming request
+      // Make the streaming request with model configuration
       const response = await fetch('/api/kb-chat-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: userMessage.content, 
-          history: messages.map(m => ({ role: m.role, content: m.content }))
+          history: messages.map(m => ({ role: m.role, content: m.content })),
+          config: modelConfig // Include the model configuration
         }),
         signal
       });
@@ -365,6 +387,12 @@ export default function ChatUI() {
     return `${day}, ${month}, ${year}`;
   };
 
+  // Handle saving config
+  const handleSaveConfig = (config) => {
+    setModelConfig(config);
+    console.log('Model configuration updated:', config);
+  };
+
   return (
     <div style={{ 
       display: 'flex', 
@@ -389,16 +417,36 @@ export default function ChatUI() {
         }}>
           AI Helpdesk
         </h1>
-        <span style={{ 
-          fontSize: '14px',
-          color: '#4a5568',
-          padding: '4px 10px',
-          backgroundColor: '#e2e8f0',
-          borderRadius: '16px',
-          fontWeight: '500'
-        }}>
-          Knowledge Base Assistant
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ 
+            fontSize: '14px',
+            color: '#4a5568',
+            padding: '4px 10px',
+            backgroundColor: '#e2e8f0',
+            borderRadius: '16px',
+            fontWeight: '500',
+            marginRight: '10px'
+          }}>
+            Knowledge Base Assistant
+          </span>
+          <button
+            onClick={() => setShowConfigPanel(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: '#f0f4f8',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+            title="AI Model Settings"
+          >
+            <Settings size={18} style={{ color: '#4a5568' }} />
+          </button>
+        </div>
       </div>
 
       {/* Buttons row */}
@@ -825,6 +873,13 @@ export default function ChatUI() {
           </form>
         </div>
       </div>
+      
+      {/* Config Panel */}
+      <ConfigPanel 
+        isOpen={showConfigPanel} 
+        onClose={() => setShowConfigPanel(false)} 
+        onSave={handleSaveConfig}
+      />
     </div>
   );
 } 

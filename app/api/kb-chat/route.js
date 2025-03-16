@@ -9,11 +9,11 @@ const KB_DIR = path.join(process.cwd(), 'knowledge-base');
 
 export async function POST(request) {
   try {
-    const { message, history } = await request.json();
+    const { message, history, config } = await request.json();
     
     console.log(`Searching knowledge base for: "${message}"`);
     
-    // First, search the knowledge base
+    // Search the knowledge base
     const kbResults = await searchKnowledgeBase(message);
     
     console.log(`Found ${kbResults.length} results in knowledge base`);
@@ -29,11 +29,12 @@ export async function POST(request) {
     const hasRelevantInfo = verifyRelevance(kbResults, queryTerms);
     console.log(`Has relevant information: ${hasRelevantInfo}`);
     
+    // Use predefined content if available
+    const predefinedResponse = getPredefinedContent(message);
+    
     if (kbResults.length > 0 && hasRelevantInfo) {
       // We found relevant information in the knowledge base
       // Check if we have a predefined response for this query
-      const predefinedResponse = getPredefinedContent(message);
-      
       if (predefinedResponse) {
         console.log('Using predefined response for query:', message);
         
@@ -80,13 +81,8 @@ export async function POST(request) {
         return `Source: ${result.title} (${result.url})\n${expandedSnippet}`;
       }).join('\n\n');
       
-      // Send to Ollama with the context
-      const response = await axios.post('http://localhost:11434/api/chat', {
-        model: 'gemma3:1b',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
+      // Get system prompt from config or use default
+      const systemPrompt = config?.systemPrompt || `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
 
 STRICT RULES:
 1. NEVER use your general knowledge to answer questions.
@@ -99,15 +95,24 @@ STRICT RULES:
 8. Format your response as a coherent paragraph with complete sentences.
 
 Knowledge Base Information:
-${context}`
+${context}`;
+      
+      // Send to Ollama with the context
+      const response = await axios.post('http://localhost:11434/api/chat', {
+        model: config?.model || 'gemma3:1b',
+        messages: [
+          { 
+            role: 'system', 
+            content: systemPrompt
           },
           ...history,
           { role: 'user', content: message }
         ],
         stream: false,
         options: {
-          temperature: 0.1, // Lower temperature for more focused responses
-          top_p: 0.9
+          temperature: config?.temperature || 0.1,
+          top_p: config?.topP || 0.9,
+          max_tokens: config?.maxTokens || 1000
         }
       });
       
@@ -135,6 +140,7 @@ ${context}`
       const usedReferences = filterUsedReferences(kbResults, responseContent);
       console.log('Used References:', usedReferences.map(r => r.title)); // Debugging log
       
+      // Only include references if we have a meaningful response (not a "no info" response)
       return NextResponse.json({ 
         response: responseContent,
         source: 'knowledge_base',
@@ -149,7 +155,8 @@ ${context}`
             relevance: r.relevance,
             snippet: r.snippet.substring(0, 100) + '...'
           })),
-          usedReferencesCount: usedReferences.length
+          usedReferencesCount: usedReferences.length,
+          model: config?.model || 'gemma3:1b'
         }
       });
     } else {
@@ -167,11 +174,11 @@ ${context}`
       });
     }
   } catch (error) {
-    console.error('Error in KB chat API:', error);
-    return NextResponse.json(
-      { error: 'Failed to process chat request' },
-      { status: 500 }
-    );
+    console.error('Error in KB chat:', error);
+    return NextResponse.json({ 
+      error: 'Failed to process request',
+      details: error.message
+    }, { status: 500 });
   }
 }
 
