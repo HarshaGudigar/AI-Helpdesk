@@ -465,7 +465,7 @@ export default function ChatUI() {
             Knowledge Base Assistant
           </span>
           <button
-            onClick={() => setShowConfigPanel(true)}
+            onClick={() => setShowConfigPanel(prev => !prev)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -473,13 +473,13 @@ export default function ChatUI() {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              backgroundColor: '#f0f4f8',
+              backgroundColor: showConfigPanel ? '#e7f5ff' : '#f0f4f8',
               border: 'none',
               cursor: 'pointer'
             }}
             title="AI Model Settings"
           >
-            <Settings size={18} style={{ color: '#4a5568' }} />
+            <Settings size={18} style={{ color: showConfigPanel ? '#4263eb' : '#4a5568' }} />
           </button>
         </div>
       </div>
