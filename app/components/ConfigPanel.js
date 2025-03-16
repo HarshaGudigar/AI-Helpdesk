@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, X, RefreshCw } from 'lucide-react';
 
-export default function ConfigPanel({ isOpen, onClose, onSave }) {
-  const [config, setConfig] = useState({
-    model: 'gemma3:1b',
-    temperature: 0.1,
-    topP: 0.9,
-    maxTokens: 1000,
-    systemPrompt: `You are HelpBot, a specialized helpdesk AI assistant focused exclusively on providing accurate information from the company knowledge base.
+// Add default configuration values
+const DEFAULT_CONFIG = {
+  model: 'gemma3:1b',
+  temperature: 0.1,
+  topP: 0.9,
+  maxTokens: 1000,
+  systemPrompt: `You are HelpBot, a specialized helpdesk AI assistant focused exclusively on providing accurate information from the company knowledge base.
 
 CORE FUNCTIONALITY:
 - Provide clear, concise answers using ONLY the information in the knowledge base
@@ -37,7 +37,11 @@ PROHIBITED BEHAVIORS:
 - Never use overly technical language unless specifically requested
 
 When customer satisfaction metrics are mentioned in the knowledge base, cite the exact figures rather than generalizing. Always prioritize accuracy over comprehensiveness.`
-  });
+};
+
+export default function ConfigPanel({ isOpen, onClose, onSave }) {
+  // Initialize state with default config
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
 
   const [availableModels, setAvailableModels] = useState([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -95,6 +99,11 @@ When customer satisfaction metrics are mentioned in the knowledge base, cite the
         ? parseFloat(value) 
         : value
     }));
+  };
+
+  // Add a reset function
+  const handleReset = () => {
+    setConfig(DEFAULT_CONFIG);
   };
 
   const handleSave = () => {
@@ -352,8 +361,25 @@ When customer satisfaction metrics are mentioned in the knowledge base, cite the
         padding: '16px 20px',
         borderTop: '1px solid #e2e8f0',
         display: 'flex',
-        justifyContent: 'flex-end'
+        justifyContent: 'space-between'
       }}>
+        <button
+          onClick={handleReset}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 16px',
+            backgroundColor: '#f1f3f5',
+            color: '#4a5568',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}
+        >
+          Reset to Default
+        </button>
         <button
           onClick={handleSave}
           style={{
