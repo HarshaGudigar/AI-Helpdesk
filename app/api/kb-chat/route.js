@@ -13,6 +13,22 @@ export async function POST(request) {
     
     console.log(`Searching knowledge base for: "${message}"`);
     
+    // Check for predefined content first, before searching knowledge base
+    const predefinedResponse = getPredefinedContent(message);
+    if (predefinedResponse) {
+      console.log('Using predefined response for query:', message);
+      
+      return NextResponse.json({ 
+        response: predefinedResponse,
+        source: 'predefined',
+        references: [],
+        debug: {
+          query: message,
+          isPredefined: true
+        }
+      });
+    }
+    
     // Search the knowledge base
     const kbResults = await searchKnowledgeBase(message);
     
@@ -29,30 +45,8 @@ export async function POST(request) {
     const hasRelevantInfo = verifyRelevance(kbResults, queryTerms);
     console.log(`Has relevant information: ${hasRelevantInfo}`);
     
-    // Use predefined content if available
-    const predefinedResponse = getPredefinedContent(message);
-    
     if (kbResults.length > 0 && hasRelevantInfo) {
       // We found relevant information in the knowledge base
-      // Check if we have a predefined response for this query
-      if (predefinedResponse) {
-        console.log('Using predefined response for query:', message);
-        
-        return NextResponse.json({ 
-          response: predefinedResponse,
-          source: 'knowledge_base',
-          references: kbResults.slice(0, 1).map(r => ({ title: r.title, url: r.url })),
-          debug: {
-            query: message,
-            resultsCount: kbResults.length,
-            hasRelevantInfo: true,
-            keyTerms: queryTerms,
-            isPredefined: true
-          }
-        });
-      }
-      
-      // Continue with normal processing if no predefined response
       // Prepare context from the knowledge base with improved formatting
       const context = kbResults.map(result => {
         // Extract a larger snippet for better context
@@ -419,7 +413,13 @@ function verifyRelevance(results, queryTerms) {
 
 // Function to get predefined content for common topics
 function getPredefinedContent(query) {
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = query.toLowerCase().trim();
+  
+  // Check for greetings first
+  const greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening'];
+  if (greetings.some(greeting => lowerQuery === greeting || lowerQuery.startsWith(greeting + ' '))) {
+    return `Hello! I'm your AI Helpdesk Assistant. I'm here to answer your questions based on my knowledge base. How can I help you today?`;
+  }
   
   // Map of topics to predefined responses
   const predefinedResponses = {

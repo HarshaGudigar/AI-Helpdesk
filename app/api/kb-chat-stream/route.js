@@ -17,6 +17,38 @@ export async function POST(request) {
       try {
         console.log(`Streaming API - Searching knowledge base for: "${message}"`);
         
+        // Check for predefined content first, before searching knowledge base
+        const predefinedResponse = getPredefinedContent(message);
+        if (predefinedResponse) {
+          console.log('Using predefined response for query:', message);
+          
+          // Send metadata
+          const metadataChunk = JSON.stringify({ 
+            type: 'metadata',
+            source: 'predefined',
+            references: [],
+            debug: {
+              query: message,
+              isPredefined: true,
+              model: config?.model || 'gemma3:1b'
+            }
+          });
+          controller.enqueue(encoder.encode(metadataChunk + '\n'));
+          
+          // Send the predefined content
+          const contentChunk = JSON.stringify({
+            type: 'content',
+            content: predefinedResponse
+          });
+          controller.enqueue(encoder.encode(contentChunk + '\n'));
+          
+          // Close the stream
+          const doneChunk = JSON.stringify({ type: 'done' });
+          controller.enqueue(encoder.encode(doneChunk + '\n'));
+          controller.close();
+          return;
+        }
+        
         // First, search the knowledge base
         const kbResults = await searchKnowledgeBase(message);
         
@@ -39,43 +71,7 @@ export async function POST(request) {
         
         if (kbResults.length > 0 && hasRelevantInfo) {
           // We found relevant information in the knowledge base
-          // Check if we have a predefined response for this query
-          const predefinedResponse = getPredefinedContent(message);
-          
-          if (predefinedResponse) {
-            console.log('Using predefined response for query:', message);
-            
-            // Send metadata
-            const metadataChunk = JSON.stringify({ 
-              type: 'metadata',
-              source: 'knowledge_base',
-              references: kbResults.slice(0, 1).map(r => ({ title: r.title, url: r.url })),
-              debug: {
-                query: message,
-                resultsCount: kbResults.length,
-                hasRelevantInfo: true,
-                keyTerms: queryTerms,
-                isPredefined: true,
-                model: config?.model || 'gemma3:1b'
-              }
-            });
-            controller.enqueue(encoder.encode(metadataChunk + '\n'));
-            
-            // Send the predefined content
-            const contentChunk = JSON.stringify({
-              type: 'content',
-              content: predefinedResponse
-            });
-            controller.enqueue(encoder.encode(contentChunk + '\n'));
-            
-            // Close the stream
-            const doneChunk = JSON.stringify({ type: 'done' });
-            controller.enqueue(encoder.encode(doneChunk + '\n'));
-            controller.close();
-            return;
-          }
-          
-          // Continue with normal processing if no predefined response
+          // Continue with normal processing
           // Prepare context from the knowledge base with improved formatting
           const context = kbResults.map(result => {
             // Extract a larger snippet for better context
@@ -104,8 +100,7 @@ export async function POST(request) {
             return `Source: ${result.title} (${result.url})\n${expandedSnippet}`;
           }).join('\n\n');
           
-          // Get system prompt from config or use default
-          systemPrompt = config?.systemPrompt || `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
+          systemPrompt = `You are a helpdesk AI assistant that ONLY answers questions based on the provided knowledge base information. 
 
 STRICT RULES:
 1. NEVER use your general knowledge to answer questions.
@@ -132,7 +127,6 @@ ${context}`;
               resultsCount: kbResults.length,
               hasRelevantInfo: hasRelevantInfo,
               keyTerms: queryTerms,
-              model: config?.model || 'gemma3:1b',
               topResults: kbResults.slice(0, 3).map(r => ({ 
                 title: r.title, 
                 relevance: r.relevance,
@@ -156,7 +150,7 @@ ${context}`;
             console.log('Ollama is running:', healthCheck.data);
             
             const response = await axios.post('http://localhost:11434/api/chat', {
-              model: config?.model || 'gemma3:1b',
+              model: 'gemma3:1b',
               messages: [
                 { role: 'system', content: systemPrompt },
                 ...history,
@@ -164,9 +158,8 @@ ${context}`;
               ],
               stream: true,
               options: {
-                temperature: config?.temperature || 0.1,
-                top_p: config?.topP || 0.9,
-                max_tokens: config?.maxTokens || 1000
+                temperature: 0.1, // Lower temperature for more focused responses
+                top_p: 0.9
               }
             }, {
               responseType: 'stream'
@@ -200,8 +193,7 @@ ${context}`;
                           query: message,
                           resultsCount: kbResults.length,
                           hasRelevantInfo: false,
-                          keyTerms: queryTerms,
-                          model: config?.model || 'gemma3:1b'
+                          keyTerms: queryTerms
                         }
                       });
                       controller.enqueue(encoder.encode(updatedMetadata + '\n'));
@@ -220,8 +212,7 @@ ${context}`;
                           resultsCount: kbResults.length,
                           hasRelevantInfo: true,
                           keyTerms: queryTerms,
-                          usedReferencesCount: usedReferences.length,
-                          model: config?.model || 'gemma3:1b'
+                          usedReferencesCount: usedReferences.length
                         }
                       });
                       controller.enqueue(encoder.encode(updatedMetadata + '\n'));
@@ -555,7 +546,13 @@ function extractKeyPhrases(text) {
 
 // Function to get predefined content for common topics
 function getPredefinedContent(query) {
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = query.toLowerCase().trim();
+  
+  // Check for greetings first
+  const greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening'];
+  if (greetings.some(greeting => lowerQuery === greeting || lowerQuery.startsWith(greeting + ' '))) {
+    return `Hello! I'm your AI Helpdesk Assistant. I'm here to answer your questions based on my knowledge base. How can I help you today?`;
+  }
   
   // Map of topics to predefined responses
   const predefinedResponses = {

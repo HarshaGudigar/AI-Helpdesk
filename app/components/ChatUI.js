@@ -78,6 +78,7 @@ export default function ChatUI() {
     
     if (!input.trim()) return;
     
+    // Create a user message with the original input (preserving case)
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
