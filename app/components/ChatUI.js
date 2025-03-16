@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Plus, Loader2, Database, Bot, Trash2, Settings } from 'lucide-react';
 import ConfigPanel from './ConfigPanel';
+import ThemeToggle from './ThemeToggle';
 
 export default function ChatUI() {
   const [messages, setMessages] = useState([]);
@@ -351,7 +352,7 @@ export default function ChatUI() {
           .replace(/```$/, '')     // Remove closing ```
           .trim();
         
-        return `<pre style="background-color: #f7f7f7; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 10px 0;"><code>${codeContent}</code></pre>`;
+        return `<pre style="background-color: var(--bg-lighter); padding: 10px; border-radius: 4px; overflow-x: auto; margin: 10px 0; border: 1px solid var(--border-light);"><code style="color: var(--text-primary);">${codeContent}</code></pre>`;
       } else {
         // Format text part
         let formatted = part.content;
@@ -364,11 +365,11 @@ export default function ChatUI() {
         
         // Format URLs: [text](url) or raw URLs like https://example.com
         formatted = formatted.replace(/\[(https?:\/\/[^\s\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, 
-          '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: none; font-weight: medium; border-bottom: 1px solid #0066cc;">$1</a>');
+          '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--primary-color); text-decoration: none; font-weight: medium; border-bottom: 1px solid var(--primary-color);">$1</a>');
         
         // Format raw URLs
         formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, 
-          '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: none; font-weight: medium; border-bottom: 1px solid #0066cc;">$1</a>');
+          '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: var(--primary-color); text-decoration: none; font-weight: medium; border-bottom: 1px solid var(--primary-color);">$1</a>');
         
         // Lists: lines starting with "* " or "- "
         const lines = formatted.split('\n');
@@ -433,7 +434,7 @@ export default function ChatUI() {
       display: 'flex', 
       flexDirection: 'column', 
       height: '100%',
-      backgroundColor: '#fff',
+      backgroundColor: 'var(--bg-light)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
     }}>
       {/* Header with title and badge */}
@@ -447,7 +448,7 @@ export default function ChatUI() {
         <h1 style={{ 
           fontSize: '24px', 
           fontWeight: 'bold',
-          color: '#4263eb',
+          color: 'var(--primary-color)',
           margin: 0
         }}>
           AI Helpdesk
@@ -455,15 +456,16 @@ export default function ChatUI() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={{ 
             fontSize: '14px',
-            color: '#4a5568',
+            color: 'var(--text-secondary)',
             padding: '4px 10px',
-            backgroundColor: '#e2e8f0',
+            backgroundColor: 'var(--bg-lighter)',
             borderRadius: '16px',
             fontWeight: '500',
             marginRight: '10px'
           }}>
             Knowledge Base Assistant
           </span>
+          <ThemeToggle />
           <button
             onClick={() => setShowConfigPanel(prev => !prev)}
             style={{
@@ -473,13 +475,14 @@ export default function ChatUI() {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              backgroundColor: showConfigPanel ? '#e7f5ff' : '#f0f4f8',
+              backgroundColor: showConfigPanel ? 'var(--primary-light)' : 'var(--bg-lighter)',
               border: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              marginLeft: '10px'
             }}
             title="AI Model Settings"
           >
-            <Settings size={18} style={{ color: showConfigPanel ? '#4263eb' : '#4a5568' }} />
+            <Settings size={18} style={{ color: showConfigPanel ? 'var(--primary-color)' : 'var(--text-secondary)' }} />
           </button>
         </div>
       </div>
@@ -498,8 +501,8 @@ export default function ChatUI() {
             padding: '8px 16px',
             border: 'none',
             borderRadius: '8px',
-            backgroundColor: '#f0f4f8',
-            color: '#4a5568',
+            backgroundColor: 'var(--bg-lighter)',
+            color: 'var(--text-secondary)',
             marginRight: '12px',
             cursor: 'pointer',
             fontWeight: '500',
@@ -507,7 +510,7 @@ export default function ChatUI() {
             transition: 'all 0.2s ease'
           }}
         >
-          <Trash2 size={16} style={{ marginRight: '8px', color: '#4a5568' }} />
+          <Trash2 size={16} style={{ marginRight: '8px', color: 'var(--text-secondary)' }} />
           Clear Chat
         </button>
         
@@ -519,15 +522,15 @@ export default function ChatUI() {
             padding: '8px 16px',
             border: 'none',
             borderRadius: '8px',
-            backgroundColor: showKnowledgeBase ? '#e7f5ff' : '#f0f4f8',
-            color: '#4a5568',
+            backgroundColor: showKnowledgeBase ? 'var(--primary-light)' : 'var(--bg-lighter)',
+            color: 'var(--text-secondary)',
             cursor: 'pointer',
             fontWeight: '500',
             boxShadow: 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Database size={16} style={{ marginRight: '8px', color: '#4263eb' }} />
+          <Database size={16} style={{ marginRight: '8px', color: 'var(--primary-color)' }} />
           Knowledge Base ({kbEntries.length})
         </button>
       </div>
@@ -538,7 +541,7 @@ export default function ChatUI() {
           border: 'none',
           borderRadius: '12px',
           padding: '16px',
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--bg-white)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
         }}>
           <form onSubmit={handleAddUrl} style={{ marginBottom: '16px', display: 'flex' }}>
@@ -550,12 +553,14 @@ export default function ChatUI() {
               style={{ 
                 flex: 1,
                 padding: '10px 16px',
-                border: '1px solid #dee2e6',
+                border: '1px solid var(--border-light)',
                 borderRadius: '8px',
                 marginRight: '8px',
                 fontSize: '14px',
                 outline: 'none',
-                transition: 'border-color 0.2s ease'
+                transition: 'border-color 0.2s ease',
+                backgroundColor: 'var(--bg-white)',
+                color: 'var(--text-primary)'
               }}
               disabled={isAddingUrl}
             />
@@ -566,7 +571,7 @@ export default function ChatUI() {
                 padding: '10px 16px',
                 border: 'none',
                 borderRadius: '8px',
-                backgroundColor: '#4263eb',
+                backgroundColor: 'var(--primary-color)',
                 color: '#fff',
                 cursor: isAddingUrl || !newUrl.trim() ? 'not-allowed' : 'pointer',
                 opacity: isAddingUrl || !newUrl.trim() ? 0.6 : 1,
@@ -584,7 +589,7 @@ export default function ChatUI() {
           <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
             {kbEntries.length === 0 ? (
               <p style={{ 
-                color: '#6c757d', 
+                color: 'var(--text-tertiary)', 
                 fontStyle: 'italic', 
                 fontSize: '14px',
                 textAlign: 'center',
@@ -597,9 +602,9 @@ export default function ChatUI() {
                 <div key={entry.filename} style={{ 
                   padding: '12px',
                   marginBottom: '8px',
-                  border: '1px solid #e9ecef',
+                  border: '1px solid var(--border-light)',
                   borderRadius: '8px',
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: 'var(--bg-lighter)',
                   fontSize: '14px',
                   transition: 'all 0.2s ease'
                 }}>
@@ -608,7 +613,7 @@ export default function ChatUI() {
                       <h4 style={{ 
                         margin: '0 0 6px 0',
                         fontWeight: '600',
-                        color: '#212529',
+                        color: 'var(--text-primary)',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
@@ -621,7 +626,7 @@ export default function ChatUI() {
                         rel="noopener noreferrer"
                         style={{ 
                           fontSize: '12px',
-                          color: '#4263eb',
+                          color: 'var(--primary-color)',
                           textDecoration: 'none',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
@@ -639,7 +644,7 @@ export default function ChatUI() {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#adb5bd',
+                        color: 'var(--text-tertiary)',
                         padding: '4px',
                         borderRadius: '4px',
                         display: 'flex',
@@ -666,7 +671,7 @@ export default function ChatUI() {
         border: 'none',
         borderRadius: '12px',
         overflow: 'hidden',
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--bg-white)',
         margin: '0 auto',
         marginBottom: '20px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -678,7 +683,7 @@ export default function ChatUI() {
           flex: 1,
           padding: '24px',
           overflowY: 'auto',
-          backgroundColor: '#f0f4f8'
+          backgroundColor: 'var(--bg-lighter)'
         }}>
           {messages.length === 0 ? (
             <div style={{ 
@@ -691,7 +696,7 @@ export default function ChatUI() {
               padding: '20px'
             }}>
               <div style={{
-                backgroundColor: '#e7f5ff',
+                backgroundColor: 'var(--primary-light)',
                 borderRadius: '50%',
                 width: '80px',
                 height: '80px',
@@ -700,16 +705,16 @@ export default function ChatUI() {
                 justifyContent: 'center',
                 marginBottom: '24px'
               }}>
-                <Bot size={40} style={{ color: '#4263eb' }} />
+                <Bot size={40} style={{ color: 'var(--primary-color)' }} />
               </div>
               <h2 style={{ 
                 fontSize: '24px',
                 fontWeight: '700',
-                color: '#212529',
+                color: 'var(--text-primary)',
                 marginBottom: '16px'
               }}>Welcome to AI Helpdesk</h2>
               <p style={{ 
-                color: '#495057', 
+                color: 'var(--text-secondary)', 
                 maxWidth: '500px', 
                 marginBottom: '16px', 
                 lineHeight: '1.5',
@@ -718,7 +723,7 @@ export default function ChatUI() {
                 Ask me anything about topics in our knowledge base. I'll only answer questions based on information that's available in the knowledge base.
               </p>
               <p style={{ 
-                color: '#6c757d', 
+                color: 'var(--text-tertiary)', 
                 maxWidth: '500px', 
                 lineHeight: '1.5',
                 textAlign: 'center'
@@ -732,7 +737,7 @@ export default function ChatUI() {
               <div style={{
                 textAlign: 'center',
                 margin: '0 0 20px 0',
-                color: '#4a5568',
+                color: 'var(--text-secondary)',
                 fontSize: '14px',
                 fontWeight: '500'
               }}>
@@ -753,7 +758,7 @@ export default function ChatUI() {
                       width: '36px',
                       height: '36px',
                       borderRadius: '50%',
-                      backgroundColor: '#4263eb',
+                      backgroundColor: 'var(--primary-color)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -768,9 +773,9 @@ export default function ChatUI() {
                     maxWidth: '70%',
                     padding: '14px 18px',
                     borderRadius: message.role === 'user' ? '18px 18px 0 18px' : '0 18px 18px 18px',
-                    backgroundColor: message.role === 'user' ? '#4263eb' : 
-                                    message.role === 'system' ? '#f1f3f5' : '#fff',
-                    color: message.role === 'user' ? '#fff' : '#212529',
+                    backgroundColor: message.role === 'user' ? 'var(--primary-color)' : 
+                                    message.role === 'system' ? 'var(--bg-lighter)' : 'var(--bg-white)',
+                    color: message.role === 'user' ? '#fff' : 'var(--text-primary)',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                   }}>
                     <div style={{ 
@@ -791,9 +796,9 @@ export default function ChatUI() {
                       <div style={{ 
                         marginTop: '12px',
                         paddingTop: '12px',
-                        borderTop: '1px solid #e9ecef',
+                        borderTop: '1px solid var(--border-light)',
                         fontSize: '13px',
-                        color: '#6c757d'
+                        color: 'var(--text-tertiary)'
                       }}>
                         <p style={{ fontWeight: '600', marginBottom: '6px' }}>Sources:</p>
                         <ul style={{ 
@@ -808,7 +813,7 @@ export default function ChatUI() {
                                 width: '6px', 
                                 height: '6px', 
                                 borderRadius: '50%', 
-                                backgroundColor: '#4263eb',
+                                backgroundColor: 'var(--primary-color)',
                                 marginRight: '8px'
                               }}></span>
                               <a 
@@ -816,10 +821,10 @@ export default function ChatUI() {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 style={{ 
-                                  color: '#4263eb', 
+                                  color: 'var(--primary-color)', 
                                   textDecoration: 'none',
                                   fontWeight: '500',
-                                  borderBottom: '1px solid #4263eb'
+                                  borderBottom: '1px solid var(--primary-color)'
                                 }}
                               >
                                 {ref.title}
@@ -835,9 +840,9 @@ export default function ChatUI() {
                       <div style={{ 
                         marginTop: '12px',
                         paddingTop: '8px',
-                        borderTop: '1px dashed #e9ecef',
+                        borderTop: '1px dashed var(--border-light)',
                         fontSize: '11px',
-                        color: '#adb5bd',
+                        color: 'var(--text-tertiary)',
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: '8px'
@@ -865,7 +870,7 @@ export default function ChatUI() {
                       width: '36px',
                       height: '36px',
                       borderRadius: '50%',
-                      backgroundColor: '#e2e8f0',
+                      backgroundColor: 'var(--bg-lighter)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -873,8 +878,8 @@ export default function ChatUI() {
                       flexShrink: 0
                     }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   )}
@@ -887,9 +892,9 @@ export default function ChatUI() {
         
         {/* Input */}
         <div style={{ 
-          borderTop: '1px solid #e9ecef',
+          borderTop: '1px solid var(--border-light)',
           padding: '16px',
-          backgroundColor: '#fff'
+          backgroundColor: 'var(--bg-white)'
         }}>
           <form onSubmit={handleSendMessage} style={{ display: 'flex' }}>
             <input
@@ -900,12 +905,14 @@ export default function ChatUI() {
               style={{ 
                 flex: 1,
                 padding: '12px 16px',
-                border: '1px solid #dee2e6',
+                border: '1px solid var(--border-light)',
                 borderRadius: '24px',
                 marginRight: '12px',
                 fontSize: '15px',
                 outline: 'none',
-                transition: 'border-color 0.2s ease'
+                transition: 'border-color 0.2s ease',
+                backgroundColor: 'var(--bg-white)',
+                color: 'var(--text-primary)'
               }}
               disabled={isLoading}
             />
@@ -916,7 +923,7 @@ export default function ChatUI() {
                 padding: '12px',
                 width: '48px',
                 height: '48px',
-                backgroundColor: '#6b8afc',
+                backgroundColor: 'var(--primary-color)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '50%',

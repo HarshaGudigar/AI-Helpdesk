@@ -17,8 +17,25 @@
   --border-light: #e2e8f0;
 }
 
+/* Dark theme variables */
+[data-theme='dark'] {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 30, 41, 59;
+  --background-end-rgb: 30, 41, 59;
+  --primary-color: #4263eb;
+  --primary-light: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --bg-light: #1e293b;
+  --bg-lighter: #0f172a;
+  --bg-white: #1e293b;
+  --border-light: #334155;
+}
+
+/* System preference fallback */
 @media (prefers-color-scheme: dark) {
-  :root {
+  [data-theme='system'] {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 30, 41, 59;
     --background-end-rgb: 30, 41, 59;
@@ -39,6 +56,7 @@ body {
   background: var(--bg-light);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @keyframes spin {

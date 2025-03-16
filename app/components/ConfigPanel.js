@@ -131,7 +131,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
       bottom: 0,
       width: '400px',
       maxWidth: '100%',
-      backgroundColor: '#fff',
+      backgroundColor: 'var(--bg-white)',
       boxShadow: '-2px 0 10px rgba(0,0,0,0.1)',
       zIndex: 1000,
       display: 'flex',
@@ -143,14 +143,14 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '16px 20px',
-        borderBottom: '1px solid #e2e8f0'
+        borderBottom: '1px solid var(--border-light)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Settings size={20} style={{ color: '#4263eb', marginRight: '10px' }} />
+          <Settings size={20} style={{ color: 'var(--primary-color)', marginRight: '10px' }} />
           <h2 style={{ 
             fontSize: '18px',
             fontWeight: '600',
-            color: '#212529',
+            color: 'var(--text-primary)',
             margin: 0
           }}>AI Model Configuration</h2>
         </div>
@@ -160,7 +160,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: '#6c757d',
+            color: 'var(--text-tertiary)',
             padding: '4px'
           }}
         >
@@ -183,7 +183,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             <label style={{
               fontSize: '14px',
               fontWeight: '500',
-              color: '#4a5568'
+              color: 'var(--text-secondary)'
             }}>
               Model
             </label>
@@ -195,7 +195,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
                 alignItems: 'center',
                 background: 'none',
                 border: 'none',
-                color: '#4263eb',
+                color: 'var(--primary-color)',
                 fontSize: '12px',
                 cursor: isLoadingModels ? 'not-allowed' : 'pointer',
                 opacity: isLoadingModels ? 0.6 : 1
@@ -227,11 +227,11 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             style={{
               width: '100%',
               padding: '10px 12px',
-              border: '1px solid #dee2e6',
+              border: '1px solid var(--border-light)',
               borderRadius: '8px',
               fontSize: '14px',
-              color: '#212529',
-              backgroundColor: '#fff'
+              color: 'var(--text-primary)',
+              backgroundColor: 'var(--bg-white)'
             }}
           >
             {availableModels.length > 0 ? (
@@ -249,7 +249,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'block',
             fontSize: '14px',
             fontWeight: '500',
-            color: '#4a5568',
+            color: 'var(--text-secondary)',
             marginBottom: '6px'
           }}>
             Temperature: {config.temperature}
@@ -264,14 +264,14 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             onChange={handleChange}
             style={{
               width: '100%',
-              accentColor: '#4263eb'
+              accentColor: 'var(--primary-color)'
             }}
           />
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             fontSize: '12px',
-            color: '#6c757d'
+            color: 'var(--text-tertiary)'
           }}>
             <span>More Focused</span>
             <span>More Creative</span>
@@ -283,7 +283,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'block',
             fontSize: '14px',
             fontWeight: '500',
-            color: '#4a5568',
+            color: 'var(--text-secondary)',
             marginBottom: '6px'
           }}>
             Top P: {config.topP}
@@ -298,7 +298,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             onChange={handleChange}
             style={{
               width: '100%',
-              accentColor: '#4263eb'
+              accentColor: 'var(--primary-color)'
             }}
           />
         </div>
@@ -308,7 +308,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'block',
             fontSize: '14px',
             fontWeight: '500',
-            color: '#4a5568',
+            color: 'var(--text-secondary)',
             marginBottom: '6px'
           }}>
             Max Tokens: {config.maxTokens}
@@ -323,7 +323,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             onChange={handleChange}
             style={{
               width: '100%',
-              accentColor: '#4263eb'
+              accentColor: 'var(--primary-color)'
             }}
           />
         </div>
@@ -333,7 +333,7 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'block',
             fontSize: '14px',
             fontWeight: '500',
-            color: '#4a5568',
+            color: 'var(--text-secondary)',
             marginBottom: '6px'
           }}>
             System Prompt
@@ -342,24 +342,26 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             name="systemPrompt"
             value={config.systemPrompt}
             onChange={handleChange}
-            rows={10}
+            placeholder="Enter system prompt..."
+            rows={8}
             style={{
               width: '100%',
               padding: '10px 12px',
-              border: '1px solid #dee2e6',
+              border: '1px solid var(--border-light)',
               borderRadius: '8px',
               fontSize: '14px',
-              color: '#212529',
+              color: 'var(--text-primary)',
+              backgroundColor: 'var(--bg-white)',
               resize: 'vertical',
               fontFamily: 'monospace'
             }}
-          />
+          ></textarea>
         </div>
       </div>
       
       <div style={{
         padding: '16px 20px',
-        borderTop: '1px solid #e2e8f0',
+        borderTop: '1px solid var(--border-light)',
         display: 'flex',
         justifyContent: 'space-between'
       }}>
@@ -369,8 +371,8 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'flex',
             alignItems: 'center',
             padding: '10px 16px',
-            backgroundColor: '#f1f3f5',
-            color: '#4a5568',
+            backgroundColor: 'var(--bg-light)',
+            color: 'var(--text-secondary)',
             border: 'none',
             borderRadius: '8px',
             fontSize: '14px',
@@ -386,8 +388,8 @@ export default function ConfigPanel({ isOpen, onClose, onSave }) {
             display: 'flex',
             alignItems: 'center',
             padding: '10px 16px',
-            backgroundColor: '#4263eb',
-            color: '#fff',
+            backgroundColor: 'var(--primary-color)',
+            color: 'var(--bg-white)',
             border: 'none',
             borderRadius: '8px',
             fontSize: '14px',

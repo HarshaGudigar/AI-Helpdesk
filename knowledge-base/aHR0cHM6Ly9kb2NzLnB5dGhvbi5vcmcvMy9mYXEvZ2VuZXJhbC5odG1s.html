@@ -1,0 +1,314 @@
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>General Python FAQ — Python 3.13.2 documentation</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+          h1 { color: #333; }
+          a { color: #0066cc; }
+          .metadata { color: #666; margin-bottom: 20px; font-size: 0.9em; }
+        </style>
+      </head>
+      <body>
+        <h1>General Python FAQ — Python 3.13.2 documentation</h1>
+        <div class="metadata">
+          <p>Source: <a href="https://docs.python.org/3/faq/general.html">https://docs.python.org/3/faq/general.html</a></p>
+          <p>Crawled: 2025-03-16T18:53:28.102Z</p>
+        </div>
+        <div class="content">
+          <p>NAVIGATION</p>
+<ul>
+<li>index</li>
+<li>modules |</li>
+<li>next |</li>
+<li>previous |</li>
+<li></li>
+<li>Python »</li>
+<li></li>
+<li></li>
+<li>3.13.2 Documentation »</li>
+<li>Python Frequently Asked Questions »</li>
+<li>General Python FAQ</li>
+<li>|</li>
+<li>Theme Auto Light Dark |</li>
+</ul>
+<p>GENERAL PYTHON FAQ¶</p>
+<p>GENERAL INFORMATION¶</p>
+<p>WHAT IS PYTHON?¶</p>
+<p>Python is an interpreted, interactive, object-oriented programming language. It incorporates modules, exceptions, dynamic typing,
+very high level dynamic data types, and classes. It supports multiple programming paradigms beyond object-oriented programming,
+such as procedural and functional programming. Python combines remarkable power with very clear syntax. It has interfaces to many
+system calls and libraries, as well as to various window systems, and is extensible in C or C++. It is also usable as an extension
+language for applications that need a programmable interface. Finally, Python is portable: it runs on many Unix variants including
+Linux and macOS, and on Windows.</p>
+<p>To find out more, start with The Python Tutorial. The Beginner’s Guide to Python links to other introductory tutorials and
+resources for learning Python.</p>
+<p>WHAT IS THE PYTHON SOFTWARE FOUNDATION?¶</p>
+<p>The Python Software Foundation is an independent non-profit organization that holds the copyright on Python versions 2.1 and
+newer. The PSF’s mission is to advance open source technology related to the Python programming language and to publicize the use
+of Python. The PSF’s home page is at <a href="https://www.python.org/psf/">https://www.python.org/psf/</a>.</p>
+<p>Donations to the PSF are tax-exempt in the US. If you use Python and find it helpful, please contribute via the PSF donation page.</p>
+<p>ARE THERE COPYRIGHT RESTRICTIONS ON THE USE OF PYTHON?¶</p>
+<p>You can do anything you want with the source, as long as you leave the copyrights in and display those copyrights in any
+documentation about Python that you produce. If you honor the copyright rules, it’s OK to use Python for commercial use, to sell
+copies of Python in source or binary form (modified or unmodified), or to sell products that incorporate Python in some form. We
+would still like to know about all commercial use of Python, of course.</p>
+<p>See the license page to find further explanations and the full text of the PSF License.</p>
+<p>The Python logo is trademarked, and in certain cases permission is required to use it. Consult the Trademark Usage Policy for more
+information.</p>
+<p>WHY WAS PYTHON CREATED IN THE FIRST PLACE?¶</p>
+<p>Here’s a very brief summary of what started it all, written by Guido van Rossum:</p>
+<blockquote>
+<p>I had extensive experience with implementing an interpreted language in the ABC group at CWI, and from working with this group I
+had learned a lot about language design. This is the origin of many Python features, including the use of indentation for
+statement grouping and the inclusion of very-high-level data types (although the details are all different in Python).</p>
+<p>I had a number of gripes about the ABC language, but also liked many of its features. It was impossible to extend the ABC
+language (or its implementation) to remedy my complaints – in fact its lack of extensibility was one of its biggest problems. I
+had some experience with using Modula-2+ and talked with the designers of Modula-3 and read the Modula-3 report. Modula-3 is the
+origin of the syntax and semantics used for exceptions, and some other Python features.</p>
+<p>I was working in the Amoeba distributed operating system group at CWI. We needed a better way to do system administration than
+by writing either C programs or Bourne shell scripts, since Amoeba had its own system call interface which wasn’t easily
+accessible from the Bourne shell. My experience with error handling in Amoeba made me acutely aware of the importance of
+exceptions as a programming language feature.</p>
+<p>It occurred to me that a scripting language with a syntax like ABC but with access to the Amoeba system calls would fill the
+need. I realized that it would be foolish to write an Amoeba-specific language, so I decided that I needed a language that was
+generally extensible.</p>
+<p>During the 1989 Christmas holidays, I had a lot of time on my hand, so I decided to give it a try. During the next year, while
+still mostly working on it in my own time, Python was used in the Amoeba project with increasing success, and the feedback from
+colleagues made me add many early improvements.</p>
+<p>In February 1991, after just over a year of development, I decided to post to USENET. The rest is in the Misc/HISTORY file.</p>
+</blockquote>
+<p>WHAT IS PYTHON GOOD FOR?¶</p>
+<p>Python is a high-level general-purpose programming language that can be applied to many different classes of problems.</p>
+<p>The language comes with a large standard library that covers areas such as string processing (regular expressions, Unicode,
+calculating differences between files), internet protocols (HTTP, FTP, SMTP, XML-RPC, POP, IMAP), software engineering (unit
+testing, logging, profiling, parsing Python code), and operating system interfaces (system calls, filesystems, TCP/IP sockets).
+Look at the table of contents for The Python Standard Library to get an idea of what’s available. A wide variety of third-party
+extensions are also available. Consult the Python Package Index to find packages of interest to you.</p>
+<p>HOW DOES THE PYTHON VERSION NUMBERING SCHEME WORK?¶</p>
+<p>Python versions are numbered “A.B.C” or “A.B”:</p>
+<ul>
+<li><p>A is the major version number – it is only incremented for really major changes in the language.</p>
+</li>
+<li><p>B is the minor version number – it is incremented for less earth-shattering changes.</p>
+</li>
+<li><p>C is the micro version number – it is incremented for each bugfix release.</p>
+</li>
+</ul>
+<p>Not all releases are bugfix releases. In the run-up to a new feature release, a series of development releases are made, denoted
+as alpha, beta, or release candidate. Alphas are early releases in which interfaces aren’t yet finalized; it’s not unexpected to
+see an interface change between two alpha releases. Betas are more stable, preserving existing interfaces but possibly adding new
+modules, and release candidates are frozen, making no changes except as needed to fix critical bugs.</p>
+<p>Alpha, beta and release candidate versions have an additional suffix:</p>
+<ul>
+<li><p>The suffix for an alpha version is “aN” for some small number N.</p>
+</li>
+<li><p>The suffix for a beta version is “bN” for some small number N.</p>
+</li>
+<li><p>The suffix for a release candidate version is “rcN” for some small number N.</p>
+</li>
+</ul>
+<p>In other words, all versions labeled 2.0aN precede the versions labeled 2.0bN, which precede versions labeled 2.0rcN, and those
+precede 2.0.</p>
+<p>You may also find version numbers with a “+” suffix, e.g. “2.2+”. These are unreleased versions, built directly from the CPython
+development repository. In practice, after a final minor release is made, the version is incremented to the next minor version,
+which becomes the “a0” version, e.g. “2.4a0”.</p>
+<p>See the Developer’s Guide for more information about the development cycle, and PEP 387 to learn more about Python’s backward
+compatibility policy. See also the documentation for sys.version, sys.hexversion, and sys.version_info.</p>
+<p>HOW DO I OBTAIN A COPY OF THE PYTHON SOURCE?¶</p>
+<p>The latest Python source distribution is always available from python.org, at <a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a>. The latest
+development sources can be obtained at <a href="https://github.com/python/cpython/">https://github.com/python/cpython/</a>.</p>
+<p>The source distribution is a gzipped tar file containing the complete C source, Sphinx-formatted documentation, Python library
+modules, example programs, and several useful pieces of freely distributable software. The source will compile and run out of the
+box on most UNIX platforms.</p>
+<p>Consult the Getting Started section of the Python Developer’s Guide for more information on getting the source code and compiling
+it.</p>
+<p>HOW DO I GET DOCUMENTATION ON PYTHON?¶</p>
+<p>The standard documentation for the current stable version of Python is available at <a href="https://docs.python.org/3/">https://docs.python.org/3/</a>. PDF, plain text,
+and downloadable HTML versions are also available at <a href="https://docs.python.org/3/download.html">https://docs.python.org/3/download.html</a>.</p>
+<p>The documentation is written in reStructuredText and processed by the Sphinx documentation tool. The reStructuredText source for
+the documentation is part of the Python source distribution.</p>
+<p>I’VE NEVER PROGRAMMED BEFORE. IS THERE A PYTHON TUTORIAL?¶</p>
+<p>There are numerous tutorials and books available. The standard documentation includes The Python Tutorial.</p>
+<p>Consult the Beginner’s Guide to find information for beginning Python programmers, including lists of tutorials.</p>
+<p>IS THERE A NEWSGROUP OR MAILING LIST DEVOTED TO PYTHON?¶</p>
+<p>There is a newsgroup, comp.lang.python, and a mailing list, python-list. The newsgroup and mailing list are gatewayed into each
+other – if you can read news it’s unnecessary to subscribe to the mailing list. comp.lang.python is high-traffic, receiving
+hundreds of postings every day, and Usenet readers are often more able to cope with this volume.</p>
+<p>Announcements of new software releases and events can be found in comp.lang.python.announce, a low-traffic moderated list that
+receives about five postings per day. It’s available as the python-announce mailing list.</p>
+<p>More info about other mailing lists and newsgroups can be found at <a href="https://www.python.org/community/lists/">https://www.python.org/community/lists/</a>.</p>
+<p>HOW DO I GET A BETA TEST VERSION OF PYTHON?¶</p>
+<p>Alpha and beta releases are available from <a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a>. All releases are announced on the comp.lang.python
+and comp.lang.python.announce newsgroups and on the Python home page at <a href="https://www.python.org/">https://www.python.org/</a>; an RSS feed of news is available.</p>
+<p>You can also access the development version of Python through Git. See The Python Developer’s Guide for details.</p>
+<p>HOW DO I SUBMIT BUG REPORTS AND PATCHES FOR PYTHON?¶</p>
+<p>To report a bug or submit a patch, use the issue tracker at <a href="https://github.com/python/cpython/issues">https://github.com/python/cpython/issues</a>.</p>
+<p>For more information on how Python is developed, consult the Python Developer’s Guide.</p>
+<p>ARE THERE ANY PUBLISHED ARTICLES ABOUT PYTHON THAT I CAN REFERENCE?¶</p>
+<p>It’s probably best to cite your favorite book about Python.</p>
+<p>The very first article about Python was written in 1991 and is now quite outdated.</p>
+<blockquote>
+<p>Guido van Rossum and Jelke de Boer, “Interactively Testing Remote Servers Using the Python Programming Language”, CWI Quarterly,
+Volume 4, Issue 4 (December 1991), Amsterdam, pp 283–303.</p>
+</blockquote>
+<p>ARE THERE ANY BOOKS ON PYTHON?¶</p>
+<p>Yes, there are many, and more are being published. See the python.org wiki at <a href="https://wiki.python.org/moin/PythonBooks">https://wiki.python.org/moin/PythonBooks</a> for a list.</p>
+<p>You can also search online bookstores for “Python” and filter out the Monty Python references; or perhaps search for “Python” and
+“language”.</p>
+<p>WHERE IN THE WORLD IS WWW.PYTHON.ORG LOCATED?¶</p>
+<p>The Python project’s infrastructure is located all over the world and is managed by the Python Infrastructure Team. Details here.</p>
+<p>WHY IS IT CALLED PYTHON?¶</p>
+<p>When he began implementing Python, Guido van Rossum was also reading the published scripts from “Monty Python’s Flying Circus”, a
+BBC comedy series from the 1970s. Van Rossum thought he needed a name that was short, unique, and slightly mysterious, so he
+decided to call the language Python.</p>
+<p>DO I HAVE TO LIKE “MONTY PYTHON’S FLYING CIRCUS”?¶</p>
+<p>No, but it helps. :)</p>
+<p>PYTHON IN THE REAL WORLD¶</p>
+<p>HOW STABLE IS PYTHON?¶</p>
+<p>Very stable. New, stable releases have been coming out roughly every 6 to 18 months since 1991, and this seems likely to continue.
+As of version 3.9, Python will have a new feature release every 12 months (PEP 602).</p>
+<p>The developers issue bugfix releases of older versions, so the stability of existing releases gradually improves. Bugfix releases,
+indicated by a third component of the version number (e.g. 3.5.3, 3.6.2), are managed for stability; only fixes for known problems
+are included in a bugfix release, and it’s guaranteed that interfaces will remain the same throughout a series of bugfix releases.</p>
+<p>The latest stable releases can always be found on the Python download page. Python 3.x is the recommended version and supported by
+most widely used libraries. Python 2.x is not maintained anymore.</p>
+<p>HOW MANY PEOPLE ARE USING PYTHON?¶</p>
+<p>There are probably millions of users, though it’s difficult to obtain an exact count.</p>
+<p>Python is available for free download, so there are no sales figures, and it’s available from many different sites and packaged
+with many Linux distributions, so download statistics don’t tell the whole story either.</p>
+<p>The comp.lang.python newsgroup is very active, but not all Python users post to the group or even read it.</p>
+<p>HAVE ANY SIGNIFICANT PROJECTS BEEN DONE IN PYTHON?¶</p>
+<p>See <a href="https://www.python.org/about/success">https://www.python.org/about/success</a> for a list of projects that use Python. Consulting the proceedings for past Python
+conferences will reveal contributions from many different companies and organizations.</p>
+<p>High-profile Python projects include the Mailman mailing list manager and the Zope application server. Several Linux
+distributions, most notably Red Hat, have written part or all of their installer and system administration software in Python.
+Companies that use Python internally include Google, Yahoo, and Lucasfilm Ltd.</p>
+<p>WHAT NEW DEVELOPMENTS ARE EXPECTED FOR PYTHON IN THE FUTURE?¶</p>
+<p>See <a href="https://peps.python.org/">https://peps.python.org/</a> for the Python Enhancement Proposals (PEPs). PEPs are design documents describing a suggested new
+feature for Python, providing a concise technical specification and a rationale. Look for a PEP titled “Python X.Y Release
+Schedule”, where X.Y is a version that hasn’t been publicly released yet.</p>
+<p>New development is discussed on the python-dev mailing list.</p>
+<p>IS IT REASONABLE TO PROPOSE INCOMPATIBLE CHANGES TO PYTHON?¶</p>
+<p>In general, no. There are already millions of lines of Python code around the world, so any change in the language that
+invalidates more than a very small fraction of existing programs has to be frowned upon. Even if you can provide a conversion
+program, there’s still the problem of updating all documentation; many books have been written about Python, and we don’t want to
+invalidate them all at a single stroke.</p>
+<p>Providing a gradual upgrade path is necessary if a feature has to be changed. PEP 5 describes the procedure followed for
+introducing backward-incompatible changes while minimizing disruption for users.</p>
+<p>IS PYTHON A GOOD LANGUAGE FOR BEGINNING PROGRAMMERS?¶</p>
+<p>Yes.</p>
+<p>It is still common to start students with a procedural and statically typed language such as Pascal, C, or a subset of C++ or
+Java. Students may be better served by learning Python as their first language. Python has a very simple and consistent syntax and
+a large standard library and, most importantly, using Python in a beginning programming course lets students concentrate on
+important programming skills such as problem decomposition and data type design. With Python, students can be quickly introduced
+to basic concepts such as loops and procedures. They can probably even work with user-defined objects in their very first course.</p>
+<p>For a student who has never programmed before, using a statically typed language seems unnatural. It presents additional
+complexity that the student must master and slows the pace of the course. The students are trying to learn to think like a
+computer, decompose problems, design consistent interfaces, and encapsulate data. While learning to use a statically typed
+language is important in the long term, it is not necessarily the best topic to address in the students’ first programming course.</p>
+<p>Many other aspects of Python make it a good first language. Like Java, Python has a large standard library so that students can be
+assigned programming projects very early in the course that do something. Assignments aren’t restricted to the standard
+four-function calculator and check balancing programs. By using the standard library, students can gain the satisfaction of
+working on realistic applications as they learn the fundamentals of programming. Using the standard library also teaches students
+about code reuse. Third-party modules such as PyGame are also helpful in extending the students’ reach.</p>
+<p>Python’s interactive interpreter enables students to test language features while they’re programming. They can keep a window with
+the interpreter running while they enter their program’s source in another window. If they can’t remember the methods for a list,
+they can do something like this:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>L = []
+dir(L)
+[&#39;<strong>add</strong>&#39;, &#39;<strong>class</strong>&#39;, &#39;<strong>contains</strong>&#39;, &#39;<strong>delattr</strong>&#39;, &#39;<strong>delitem</strong>&#39;,
+&#39;<strong>dir</strong>&#39;, &#39;<strong>doc</strong>&#39;, &#39;<strong>eq</strong>&#39;, &#39;<strong>format</strong>&#39;, &#39;<strong>ge</strong>&#39;,
+&#39;<strong>getattribute</strong>&#39;, &#39;<strong>getitem</strong>&#39;, &#39;<strong>gt</strong>&#39;, &#39;<strong>hash</strong>&#39;, &#39;<strong>iadd</strong>&#39;,
+&#39;<strong>imul</strong>&#39;, &#39;<strong>init</strong>&#39;, &#39;<strong>iter</strong>&#39;, &#39;<strong>le</strong>&#39;, &#39;<strong>len</strong>&#39;, &#39;<strong>lt</strong>&#39;,
+&#39;<strong>mul</strong>&#39;, &#39;<strong>ne</strong>&#39;, &#39;<strong>new</strong>&#39;, &#39;<strong>reduce</strong>&#39;, &#39;<strong>reduce_ex</strong>&#39;,
+&#39;<strong>repr</strong>&#39;, &#39;<strong>reversed</strong>&#39;, &#39;<strong>rmul</strong>&#39;, &#39;<strong>setattr</strong>&#39;, &#39;<strong>setitem</strong>&#39;,
+&#39;<strong>sizeof</strong>&#39;, &#39;<strong>str</strong>&#39;, &#39;<strong>subclasshook</strong>&#39;, &#39;append&#39;, &#39;clear&#39;,
+&#39;copy&#39;, &#39;count&#39;, &#39;extend&#39;, &#39;index&#39;, &#39;insert&#39;, &#39;pop&#39;, &#39;remove&#39;,
+&#39;reverse&#39;, &#39;sort&#39;]</p>
+<blockquote>
+<blockquote>
+<p>[d for d in dir(L) if &#39;__&#39; not in d]
+[&#39;append&#39;, &#39;clear&#39;, &#39;copy&#39;, &#39;count&#39;, &#39;extend&#39;, &#39;index&#39;, &#39;insert&#39;, &#39;pop&#39;, &#39;remove&#39;, &#39;reverse&#39;, &#39;sort&#39;]</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>help(L.append)
+Help on built-in function append:</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>append(...)
+    L.append(object) -&gt; None -- append object to end</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>L.append(1)
+L
+[1]</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>With the interpreter, documentation is never far from the student as they are programming.</p>
+<p>There are also good IDEs for Python. IDLE is a cross-platform IDE for Python that is written in Python using Tkinter. Emacs users
+will be happy to know that there is a very good Python mode for Emacs. All of these programming environments provide syntax
+highlighting, auto-indenting, and access to the interactive interpreter while coding. Consult the Python wiki for a full list of
+Python editing environments.</p>
+<p>If you want to discuss Python’s use in education, you may be interested in joining the edu-sig mailing list.</p>
+<p>TABLE OF CONTENTS</p>
+<ul>
+<li>General Python FAQ<ul>
+<li>General Information</li>
+<li>Python in the real world</li>
+</ul>
+</li>
+</ul>
+<p>PREVIOUS TOPIC</p>
+<p>Python Frequently Asked Questions</p>
+<p>NEXT TOPIC</p>
+<p>Programming FAQ</p>
+<p>THIS PAGE</p>
+<ul>
+<li>Report a Bug</li>
+<li>Show Source</li>
+</ul>
+<p>«</p>
+<p>NAVIGATION</p>
+<ul>
+<li>index</li>
+<li>modules |</li>
+<li>next |</li>
+<li>previous |</li>
+<li></li>
+<li>Python »</li>
+<li></li>
+<li></li>
+<li>3.13.2 Documentation »</li>
+<li>Python Frequently Asked Questions »</li>
+<li>General Python FAQ</li>
+<li>|</li>
+<li>Theme Auto Light Dark |</li>
+</ul>
+<p>© Copyright 2001-2025, Python Software Foundation.
+This page is licensed under the Python Software Foundation License Version 2.
+Examples, recipes, and other code in the documentation are additionally licensed under the Zero Clause BSD License.
+See History and License for more information.</p>
+<p>The Python Software Foundation is a non-profit corporation. Please donate.</p>
+<p>Last updated on Mar 16, 2025 (16:16 UTC). Found a bug?
+Created using Sphinx 8.2.3.</p>
+
+        </div>
+      </body>
+      </html>
+    
