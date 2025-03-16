@@ -12,6 +12,7 @@ export default function ChatUI() {
   const [newUrl, setNewUrl] = useState('');
   const [isAddingUrl, setIsAddingUrl] = useState(false);
   const messagesEndRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Fetch knowledge base entries
   const fetchKnowledgeBase = async () => {
@@ -33,6 +34,22 @@ export default function ChatUI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Add a useEffect to handle window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check on initial load
+    checkMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Handle sending a message
   const handleSendMessage = async (e) => {
@@ -339,23 +356,75 @@ export default function ChatUI() {
     return formattedParts.join('');
   };
 
+  // Add a function to format the current date
+  const formatDate = () => {
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'long' }).toUpperCase();
+    const year = date.getFullYear();
+    return `${day}, ${month}, ${year}`;
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', marginBottom: '20px' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%',
+      backgroundColor: '#fff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
+    }}>
+      {/* Header with title and badge */}
+      <div style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px',
+        padding: '0 20px'
+      }}>
+        <h1 style={{ 
+          fontSize: '24px', 
+          fontWeight: 'bold',
+          color: '#4263eb',
+          margin: 0
+        }}>
+          AI Helpdesk
+        </h1>
+        <span style={{ 
+          fontSize: '14px',
+          color: '#4a5568',
+          padding: '4px 10px',
+          backgroundColor: '#e2e8f0',
+          borderRadius: '16px',
+          fontWeight: '500'
+        }}>
+          Knowledge Base Assistant
+        </span>
+      </div>
+
+      {/* Buttons row */}
+      <div style={{ 
+        display: 'flex', 
+        marginBottom: '20px',
+        padding: '0 20px'
+      }}>
         <button 
           onClick={handleNewChat}
           style={{ 
             display: 'flex',
             alignItems: 'center',
-            padding: '5px 10px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            backgroundColor: '#f5f5f5',
-            marginRight: '10px',
-            cursor: 'pointer'
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '8px',
+            backgroundColor: '#f0f4f8',
+            color: '#4a5568',
+            marginRight: '12px',
+            cursor: 'pointer',
+            fontWeight: '500',
+            boxShadow: 'none',
+            transition: 'all 0.2s ease'
           }}
         >
-          <Plus size={16} style={{ marginRight: '5px' }} />
+          <Plus size={16} style={{ marginRight: '8px', color: '#4a5568' }} />
           New Chat
         </button>
         
@@ -364,38 +433,46 @@ export default function ChatUI() {
           style={{ 
             display: 'flex',
             alignItems: 'center',
-            padding: '5px 10px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            backgroundColor: '#f5f5f5',
-            cursor: 'pointer'
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '8px',
+            backgroundColor: showKnowledgeBase ? '#e7f5ff' : '#f0f4f8',
+            color: '#4a5568',
+            cursor: 'pointer',
+            fontWeight: '500',
+            boxShadow: 'none',
+            transition: 'all 0.2s ease'
           }}
         >
-          <Database size={16} style={{ marginRight: '5px' }} />
+          <Database size={16} style={{ marginRight: '8px', color: '#4263eb' }} />
           Knowledge Base ({kbEntries.length})
         </button>
       </div>
       
       {showKnowledgeBase && (
         <div style={{ 
-          marginBottom: '20px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          padding: '10px',
-          backgroundColor: '#f5f5f5'
+          margin: '0 20px 20px',
+          border: 'none',
+          borderRadius: '12px',
+          padding: '16px',
+          backgroundColor: '#fff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
         }}>
-          <form onSubmit={handleAddUrl} style={{ marginBottom: '10px', display: 'flex' }}>
+          <form onSubmit={handleAddUrl} style={{ marginBottom: '16px', display: 'flex' }}>
             <input
               type="url"
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
-              placeholder="Add URL..."
+              placeholder="Add URL to knowledge base..."
               style={{ 
                 flex: 1,
-                padding: '5px 10px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                marginRight: '5px'
+                padding: '10px 16px',
+                border: '1px solid #dee2e6',
+                borderRadius: '8px',
+                marginRight: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
               }}
               disabled={isAddingUrl}
             />
@@ -403,36 +480,52 @@ export default function ChatUI() {
               type="submit"
               disabled={isAddingUrl || !newUrl.trim()}
               style={{ 
-                padding: '5px 10px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                backgroundColor: '#f5f5f5',
+                padding: '10px 16px',
+                border: 'none',
+                borderRadius: '8px',
+                backgroundColor: '#4263eb',
+                color: '#fff',
                 cursor: isAddingUrl || !newUrl.trim() ? 'not-allowed' : 'pointer',
-                opacity: isAddingUrl || !newUrl.trim() ? 0.5 : 1
+                opacity: isAddingUrl || !newUrl.trim() ? 0.6 : 1,
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
               }}
             >
-              {isAddingUrl ? <Loader2 size={16} /> : <Plus size={16} />}
+              {isAddingUrl ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Plus size={16} />}
             </button>
           </form>
           
-          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
             {kbEntries.length === 0 ? (
-              <p style={{ color: '#666', fontStyle: 'italic', fontSize: '14px' }}>No entries yet</p>
+              <p style={{ 
+                color: '#6c757d', 
+                fontStyle: 'italic', 
+                fontSize: '14px',
+                textAlign: 'center',
+                padding: '20px 0'
+              }}>
+                No entries yet. Add URLs to build your knowledge base.
+              </p>
             ) : (
               kbEntries.map((entry) => (
                 <div key={entry.filename} style={{ 
-                  padding: '8px',
-                  marginBottom: '5px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#fff',
-                  fontSize: '14px'
+                  padding: '12px',
+                  marginBottom: '8px',
+                  border: '1px solid #e9ecef',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8f9fa',
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div style={{ overflow: 'hidden' }}>
+                    <div style={{ overflow: 'hidden', flex: 1 }}>
                       <h4 style={{ 
-                        margin: '0 0 5px 0',
-                        fontWeight: 'bold',
+                        margin: '0 0 6px 0',
+                        fontWeight: '600',
+                        color: '#212529',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
@@ -445,7 +538,7 @@ export default function ChatUI() {
                         rel="noopener noreferrer"
                         style={{ 
                           fontSize: '12px',
-                          color: 'blue',
+                          color: '#4263eb',
                           textDecoration: 'none',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
@@ -463,11 +556,17 @@ export default function ChatUI() {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#999'
+                        color: '#adb5bd',
+                        padding: '4px',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
                       }}
                       title="Delete entry"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -481,16 +580,22 @@ export default function ChatUI() {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
+        border: 'none',
+        borderRadius: '12px',
         overflow: 'hidden',
-        backgroundColor: '#f5f5f5'
-      }}>
+        backgroundColor: '#fff',
+        margin: '0 auto',
+        marginBottom: '20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        width: '800px',
+        maxWidth: '100%'
+      }} className="chat-container">
         {/* Messages */}
         <div style={{ 
           flex: 1,
-          padding: '20px',
-          overflowY: 'auto'
+          padding: '24px',
+          overflowY: 'auto',
+          backgroundColor: '#f0f4f8'
         }}>
           {messages.length === 0 ? (
             <div style={{ 
@@ -502,90 +607,176 @@ export default function ChatUI() {
               textAlign: 'center',
               padding: '20px'
             }}>
-              <Bot size={48} style={{ color: '#ccc', marginBottom: '20px' }} />
+              <div style={{
+                backgroundColor: '#e7f5ff',
+                borderRadius: '50%',
+                width: '80px',
+                height: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px'
+              }}>
+                <Bot size={40} style={{ color: '#4263eb' }} />
+              </div>
               <h2 style={{ 
                 fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#333',
-                marginBottom: '10px'
+                fontWeight: '700',
+                color: '#212529',
+                marginBottom: '16px'
               }}>Welcome to AI Helpdesk</h2>
-              <p style={{ color: '#666', maxWidth: '500px', marginBottom: '15px' }}>
+              <p style={{ 
+                color: '#495057', 
+                maxWidth: '500px', 
+                marginBottom: '16px', 
+                lineHeight: '1.5',
+                textAlign: 'center'
+              }}>
                 Ask me anything about topics in our knowledge base. I'll only answer questions based on information that's available in the knowledge base.
               </p>
-              <p style={{ color: '#666', maxWidth: '500px' }}>
+              <p style={{ 
+                color: '#6c757d', 
+                maxWidth: '500px', 
+                lineHeight: '1.5',
+                textAlign: 'center'
+              }}>
                 If I don't have the information you're looking for, I'll let you know. To expand my knowledge, add URLs to the knowledge base using the button above.
               </p>
             </div>
           ) : (
-            messages.map((message, index) => (
-              <div 
-                key={index}
-                style={{ 
-                  marginBottom: '15px',
-                  display: 'flex',
-                  justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start'
-                }}
-              >
-                <div style={{ 
-                  maxWidth: '70%',
-                  padding: '10px 15px',
-                  borderRadius: '8px',
-                  backgroundColor: message.role === 'user' ? '#1a73e8' : 
-                                  message.role === 'system' ? '#f0f0f0' : '#fff',
-                  color: message.role === 'user' ? '#fff' : '#333',
-                  border: message.role === 'assistant' ? '1px solid #ddd' : 'none'
-                }}>
-                  <div style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}></div>
-                  
-                  {message.isStreaming && (
-                    <span style={{ display: 'inline-block', marginLeft: '5px' }}>▋</span>
+            <>
+              {/* Date header */}
+              <div style={{
+                textAlign: 'center',
+                margin: '0 0 20px 0',
+                color: '#4a5568',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                {formatDate()}
+              </div>
+              
+              {messages.map((message, index) => (
+                <div 
+                  key={index}
+                  style={{ 
+                    marginBottom: '20px',
+                    display: 'flex',
+                    justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start'
+                  }}
+                >
+                  {message.role !== 'user' && (
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#4263eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '12px',
+                      flexShrink: 0
+                    }}>
+                      <Bot size={20} style={{ color: '#fff' }} />
+                    </div>
                   )}
                   
-                  {message.role === 'assistant' && message.references && message.references.length > 0 && (
+                  <div style={{ 
+                    maxWidth: '70%',
+                    padding: '14px 18px',
+                    borderRadius: message.role === 'user' ? '18px 18px 0 18px' : '0 18px 18px 18px',
+                    backgroundColor: message.role === 'user' ? '#4263eb' : 
+                                    message.role === 'system' ? '#f1f3f5' : '#fff',
+                    color: message.role === 'user' ? '#fff' : '#212529',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}>
                     <div style={{ 
-                      marginTop: '10px',
-                      paddingTop: '10px',
-                      borderTop: '1px solid #eee',
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
-                      <p style={{ fontWeight: 'bold' }}>Sources:</p>
-                      <ul style={{ 
-                        listStyleType: 'disc',
-                        paddingLeft: '20px',
-                        marginTop: '5px'
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: '1.5',
+                      fontSize: '15px'
+                    }} dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}></div>
+                    
+                    {message.isStreaming && (
+                      <span style={{ 
+                        display: 'inline-block', 
+                        marginLeft: '5px',
+                        animation: 'blink 1s infinite'
+                      }}>▋</span>
+                    )}
+                    
+                    {message.role === 'assistant' && message.references && message.references.length > 0 && (
+                      <div style={{ 
+                        marginTop: '12px',
+                        paddingTop: '12px',
+                        borderTop: '1px solid #e9ecef',
+                        fontSize: '13px',
+                        color: '#6c757d'
                       }}>
-                        {message.references.map((ref, i) => (
-                          <li key={i} style={{ marginTop: '3px' }}>
-                            <a 
-                              href={ref.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              style={{ 
-                                color: '#0066cc', 
-                                textDecoration: 'none',
-                                fontWeight: 'medium',
-                                borderBottom: '1px solid #0066cc'
-                              }}
-                            >
-                              {ref.title}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                        <p style={{ fontWeight: '600', marginBottom: '6px' }}>Sources:</p>
+                        <ul style={{ 
+                          listStyleType: 'none',
+                          padding: '0',
+                          margin: '0'
+                        }}>
+                          {message.references.map((ref, i) => (
+                            <li key={i} style={{ marginTop: '4px', display: 'flex', alignItems: 'center' }}>
+                              <span style={{ 
+                                display: 'inline-block', 
+                                width: '6px', 
+                                height: '6px', 
+                                borderRadius: '50%', 
+                                backgroundColor: '#4263eb',
+                                marginRight: '8px'
+                              }}></span>
+                              <a 
+                                href={ref.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ 
+                                  color: '#4263eb', 
+                                  textDecoration: 'none',
+                                  fontWeight: '500',
+                                  borderBottom: '1px solid #4263eb'
+                                }}
+                              >
+                                {ref.title}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {message.role === 'user' && (
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginLeft: '12px',
+                      flexShrink: 0
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
                   )}
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
         
         {/* Input */}
         <div style={{ 
-          borderTop: '1px solid #ccc',
-          padding: '10px',
+          borderTop: '1px solid #e9ecef',
+          padding: '16px',
           backgroundColor: '#fff'
         }}>
           <form onSubmit={handleSendMessage} style={{ display: 'flex' }}>
@@ -596,10 +787,13 @@ export default function ChatUI() {
               placeholder="Type your message..."
               style={{ 
                 flex: 1,
-                padding: '8px 12px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                marginRight: '10px'
+                padding: '12px 16px',
+                border: '1px solid #dee2e6',
+                borderRadius: '24px',
+                marginRight: '12px',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
               }}
               disabled={isLoading}
             />
@@ -607,16 +801,26 @@ export default function ChatUI() {
               type="submit"
               disabled={isLoading || !input.trim()}
               style={{ 
-                padding: '8px 15px',
-                backgroundColor: '#1a73e8',
+                padding: '12px',
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#6b8afc',
                 color: '#fff',
                 border: 'none',
-                borderRadius: '4px',
+                borderRadius: '50%',
                 cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
-                opacity: isLoading || !input.trim() ? 0.5 : 1
+                opacity: isLoading || !input.trim() ? 0.6 : 1,
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
               }}
             >
-              {isLoading ? <Loader2 size={20} /> : <Send size={20} />}
+              {isLoading ? 
+                <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : 
+                <Send size={20} />
+              }
             </button>
           </form>
         </div>
