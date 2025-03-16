@@ -282,7 +282,7 @@ export default function ChatUI() {
   };
 
   // Start a new chat
-  const handleNewChat = () => {
+  const handleClearChat = () => {
     setMessages([]);
   };
 
@@ -491,7 +491,7 @@ export default function ChatUI() {
         padding: '0 20px'
       }}>
         <button 
-          onClick={handleNewChat}
+          onClick={handleClearChat}
           style={{ 
             display: 'flex',
             alignItems: 'center',
@@ -507,8 +507,8 @@ export default function ChatUI() {
             transition: 'all 0.2s ease'
           }}
         >
-          <Plus size={16} style={{ marginRight: '8px', color: '#4a5568' }} />
-          New Chat
+          <Trash2 size={16} style={{ marginRight: '8px', color: '#4a5568' }} />
+          Clear Chat
         </button>
         
         <button 
