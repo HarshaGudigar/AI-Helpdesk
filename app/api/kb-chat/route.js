@@ -312,10 +312,22 @@ async function searchKnowledgeBase(query) {
   
   // Improved search implementation
   const results = [];
-  const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+  
+  // Extract technical terms and product names first (they're important regardless of length)
+  const technicalTerms = query.match(/([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Z][A-Za-z0-9]*(?:-[0-9]+)?)/g) || [];
+  
+  // Filter out common words and keep only meaningful terms
+  const commonWords = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'with', 'about', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'can', 'could', 'will', 'would', 'should', 'may', 'might', 'must', 'tell', 'me'];
+  const queryWords = query.toLowerCase()
+    .replace(/[^\w\s]/g, '') // Remove punctuation
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !commonWords.includes(word));
+  
+  // Combine technical terms with regular query words, ensuring no duplicates
+  const allQueryTerms = [...new Set([...technicalTerms.map(term => term.toLowerCase()), ...queryWords])];
   
   // If no meaningful words in query, return empty results
-  if (queryWords.length === 0) {
+  if (allQueryTerms.length === 0) {
     return [];
   }
   
@@ -343,8 +355,30 @@ async function searchKnowledgeBase(query) {
     let matchCount = 0;
     let bestMatchIndex = -1;
     let bestMatchWord = '';
+    let titleMatchCount = 0;
+    let technicalTermMatchCount = 0;
     
-    for (const word of queryWords) {
+    // Check for exact phrase match first (highest relevance)
+    const exactPhrase = queryWords.join(' ');
+    const exactPhraseMatch = lowerText.includes(exactPhrase);
+    
+    // Check for technical term matches (highest priority)
+    for (const term of technicalTerms) {
+      if (lowerText.includes(term.toLowerCase())) {
+        technicalTermMatchCount++;
+      }
+    }
+    
+    // Check title matches (high relevance)
+    const lowerTitle = title.toLowerCase();
+    for (const word of allQueryTerms) {
+      if (lowerTitle.includes(word)) {
+        titleMatchCount++;
+      }
+    }
+    
+    // Check content matches
+    for (const word of allQueryTerms) {
       if (lowerText.includes(word)) {
         matchCount++;
         
@@ -368,12 +402,30 @@ async function searchKnowledgeBase(query) {
       if (start > 0) snippet = '...' + snippet;
       if (end < plainText.length) snippet = snippet + '...';
       
+      // Calculate a more sophisticated relevance score
+      let relevance = matchCount / allQueryTerms.length; // Base relevance
+      
+      // Boost score for title matches
+      if (titleMatchCount > 0) {
+        relevance += (titleMatchCount / allQueryTerms.length) * 0.5;
+      }
+      
+      // Boost score for exact phrase match
+      if (exactPhraseMatch) {
+        relevance += 0.5;
+      }
+      
+      // Significant boost for technical term matches
+      if (technicalTermMatchCount > 0) {
+        relevance += (technicalTermMatchCount / technicalTerms.length) * 0.8;
+      }
+      
       results.push({
         title,
         url,
         snippet,
         filename: file,
-        relevance: matchCount / queryWords.length // Calculate relevance score
+        relevance: Math.min(relevance, 1.0) // Cap at 1.0
       });
     }
   }
@@ -401,19 +453,37 @@ function verifyRelevance(results, queryTerms) {
     return false;
   }
   
-  // If we have results but no query terms (e.g., short query), consider it relevant
+  // If we have results but no query terms (e.g., short query), be cautious
   if (queryTerms.length === 0) {
-    return true;
+    // Only consider it relevant if the top result has high relevance
+    return results[0].relevance > 0.8;
+  }
+  
+  // First, check for exact phrase matches in the query
+  const exactPhrase = queryTerms.join(' ');
+  for (const result of results.slice(0, 3)) { // Check top 3 results for exact phrase
+    const titleAndSnippet = (result.title + ' ' + result.snippet).toLowerCase();
+    
+    // If the exact phrase is found, it's definitely relevant
+    if (titleAndSnippet.includes(exactPhrase)) {
+      return true;
+    }
+    
+    // Check for product names or specific technical terms (like "GPT-4 Turbo")
+    // These are likely to be important even if they're just a part of the query
+    const technicalTerms = queryTerms.join(' ').match(/([A-Za-z0-9]+-[A-Za-z0-9]+|[A-Z][A-Za-z0-9]*(?:-[0-9]+)?)/g);
+    if (technicalTerms) {
+      for (const term of technicalTerms) {
+        if (titleAndSnippet.includes(term.toLowerCase())) {
+          return true;
+        }
+      }
+    }
   }
   
   // Check if any of the key terms appear in the top result's title or snippet
-  for (const result of results.slice(0, 3)) { // Check top 3 results
+  for (const result of results.slice(0, 2)) { // Check only top 2 results
     const titleAndSnippet = (result.title + ' ' + result.snippet).toLowerCase();
-    
-    // If the query is a direct match for the title, it's definitely relevant
-    if (titleAndSnippet.includes(queryTerms.join(' '))) {
-      return true;
-    }
     
     // Count how many query terms match
     let matchCount = 0;
@@ -423,15 +493,16 @@ function verifyRelevance(results, queryTerms) {
       }
     }
     
-    // If more than half of the query terms match, consider it relevant
-    if (matchCount > 0 && matchCount >= Math.ceil(queryTerms.length / 2)) {
+    // Require at least 60% of query terms to match for relevance (reduced from 70%)
+    const requiredMatches = Math.ceil(queryTerms.length * 0.6);
+    if (matchCount >= requiredMatches) {
       return true;
     }
   }
   
-  // If we have results but no strong term matches, still consider the top result relevant
-  // This helps with queries that might use synonyms or different phrasing
-  if (results.length > 0 && results[0].relevance > 0.5) {
+  // Only consider the top result relevant if it has very high relevance
+  // This helps prevent responses based on weak matches
+  if (results.length > 0 && results[0].relevance > 0.7) {
     return true;
   }
   
