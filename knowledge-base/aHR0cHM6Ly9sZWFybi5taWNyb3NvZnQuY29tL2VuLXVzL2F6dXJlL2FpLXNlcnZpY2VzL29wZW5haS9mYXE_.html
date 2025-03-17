@@ -1,0 +1,353 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Azure OpenAI Service frequently asked questions - Azure AI services | Microsoft Learn</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+            h1 { color: #333; }
+            a { color: #0066cc; }
+            .metadata { color: #666; margin-bottom: 20px; font-size: 0.9em; }
+          </style>
+        </head>
+        <body>
+          <h1>Azure OpenAI Service frequently asked questions - Azure AI services | Microsoft Learn</h1>
+          <div class="metadata">
+            <p>Source: <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/faq">https://learn.microsoft.com/en-us/azure/ai-services/openai/faq</a></p>
+            <p>Crawled: 2025-03-17T04:36:36.184Z</p>
+          </div>
+          <div class="content">
+            <p>Read in English Save
+Table of contents Read in English Save Add to plan Edit</p>
+<hr>
+<p>SHARE VIA</p>
+<p>Facebook x.com LinkedIn Email</p>
+<hr>
+<p>Print
+Table of contents</p>
+<p>AZURE OPENAI SERVICE FREQUENTLY ASKED QUESTIONS</p>
+<ul>
+<li>FAQ</li>
+<li>14 contributors</li>
+</ul>
+<p>Feedback</p>
+<p>If you can&#39;t find answers to your questions in this document, and still need help check the Azure AI services support options
+guide. Azure OpenAI is part of Azure AI services.</p>
+<p>DATA AND PRIVACY</p>
+<p>DO YOU USE MY COMPANY DATA TO TRAIN ANY OF THE MODELS?</p>
+<p>Azure OpenAI doesn&#39;t use customer data to retrain models. For more information, see the Azure OpenAI data, privacy, and security
+guide.</p>
+<p>GENERAL</p>
+<p>DOES AZURE OPENAI SUPPORT CUSTOM API HEADERS? WE APPEND ADDITIONAL CUSTOM HEADERS TO OUR API REQUESTS AND ARE SEEING HTTP 431
+FAILURE ERRORS.</p>
+<p>Our current APIs allow up to 10 custom headers, which are passed through the pipeline, and returned. We have noticed some
+customers now exceed this header count resulting in HTTP 431 errors. There is no solution for this error, other than to reduce
+header volume. In future API versions we will no longer pass through custom headers. We recommend customers not depend on custom
+headers in future system architectures.</p>
+<p>DOES AZURE OPENAI WORK WITH THE LATEST PYTHON LIBRARY RELEASED BY OPENAI (VERSION&gt;=1.0)?</p>
+<p>Azure OpenAI is supported by the latest release of the OpenAI Python library (version&gt;=1.0). However, it&#39;s important to note
+migration of your codebase using openai migrate is not supported and will not work with code that targets Azure OpenAI.</p>
+<p>I CAN&#39;T FIND GPT-4 TURBO PREVIEW, WHERE IS IT?</p>
+<p>GPT-4 Turbo Preview is the gpt-4 (1106-preview) model. To deploy this model, under Deployments select model gpt-4. For Model
+version select 1106-preview. To check which regions this model is available, refer to the models page.</p>
+<p>DOES AZURE OPENAI SUPPORT GPT-4?</p>
+<p>Azure OpenAI supports the latest GPT-4 models. It supports both GPT-4 and GPT-4-32K.</p>
+<p>HOW DO THE CAPABILITIES OF AZURE OPENAI COMPARE TO OPENAI?</p>
+<p>Azure OpenAI Service gives customers advanced language AI with OpenAI GPT-3, Codex, and DALL-E models with the security and
+enterprise promise of Azure. Azure OpenAI codevelops the APIs with OpenAI, ensuring compatibility and a smooth transition from one
+to the other.</p>
+<p>With Azure OpenAI, customers get the security capabilities of Microsoft Azure while running the same models as OpenAI.</p>
+<p>DOES AZURE OPENAI SUPPORT VNETS AND PRIVATE ENDPOINTS?</p>
+<p>Yes, as part of Azure AI services, Azure OpenAI supports VNETs and Private Endpoints. To learn more, consult the Azure AI services
+virtual networking guidance.</p>
+<p>DO THE GPT-4 MODELS CURRENTLY SUPPORT IMAGE INPUT?</p>
+<p>No, GPT-4 is designed by OpenAI to be multimodal, but currently only text input and output are supported.</p>
+<p>HOW DO I APPLY FOR NEW USE CASES?</p>
+<p>Previously, the process for adding new use cases required customers to reapply to the service. Now, we&#39;re releasing a new process
+that allows you to quickly add new use cases to your use of the service. This process follows the established Limited Access
+process within Azure AI services. Existing customers can attest to any and all new use cases here. Note that this is required
+anytime you would like to use the service for a new use case you didn&#39;t originally apply for.</p>
+<p>I&#39;M TRYING TO USE EMBEDDINGS AND RECEIVED THE ERROR &quot;INVALIDREQUESTERROR: TOO MANY INPUTS. THE MAX NUMBER OF INPUTS IS 16.&quot; HOW DO
+I FIX THIS?</p>
+<p>This error typically occurs when you try to send a batch of text to embed in a single API request as an array. Currently Azure
+OpenAI only supports arrays of embeddings with multiple inputs for the text-embedding-ada-002 Version 2 model. This model version
+supports an array consisting of up to 16 inputs per API request. The array can be up to 8,191 tokens in length when using the
+text-embedding-ada-002 (Version 2) model.</p>
+<p>WHERE CAN I READ ABOUT BETTER WAYS TO USE AZURE OPENAI TO GET THE RESPONSES I WANT FROM THE SERVICE?</p>
+<p>Check out our introduction to prompt engineering. While these models are powerful, their behavior is also very sensitive to the
+prompts they receive from the user. This makes prompt construction an important skill to develop. After you&#39;ve completed the
+introduction, check out our article on system messages.</p>
+<p>WHEN I ASK GPT-4 WHICH MODEL IT&#39;S RUNNING, IT TELLS ME IT&#39;S RUNNING GPT-3. WHY DOES THIS HAPPEN?</p>
+<p>Azure OpenAI models (including GPT-4) being unable to correctly identify what model is running is expected behavior.</p>
+<p>Why does this happen?</p>
+<p>Ultimately, the model is performing next token prediction in response to your question. The model doesn&#39;t have any native ability
+to query what model version is currently being run to answer your question. To answer this question, you can always go to Azure AI
+Foundry &gt; Management &gt; Deployments &gt; and consult the model name column to confirm what model is currently associated with a given
+deployment name.</p>
+<p>The questions, &quot;What model are you running?&quot; or &quot;What is the latest model from OpenAI?&quot; produce similar quality results to asking
+the model what the weather will be today. It might return the correct result, but purely by chance. On its own, the model has no
+real-world information other than what was part of its training/training data. In the case of GPT-4, as of August 2023 the
+underlying training data goes only up to September 2021. GPT-4 wasn&#39;t released until March 2023, so barring OpenAI releasing a new
+version with updated training data, or a new version that is fine-tuned to answer those specific questions, it&#39;s expected behavior
+for GPT-4 to respond that GPT-3 is the latest model release from OpenAI.</p>
+<p>If you wanted to help a GPT based model to accurately respond to the question &quot;what model are you running?&quot;, you would need to
+provide that information to the model through techniques like prompt engineering of the model&#39;s system message, Retrieval
+Augmented Generation (RAG) which is the technique used by Azure OpenAI on your data where up-to-date information is injected to
+the system message at query time, or via fine-tuning where you could fine-tune specific versions of the model to answer that
+question in a certain way based on model version.</p>
+<p>To learn more about how GPT models are trained and work we recommend watching Andrej Karpathy&#39;s talk from Build 2023 on the state
+of GPT.</p>
+<p>HOW CAN I GET THE MODEL TO RESPOND IN A SPECIFIC LANGUAGE?</p>
+<p>Ensure that your prompt is clear and specific about the language requirement. If the issue persists, consider adding more context
+or rephrasing the prompt to reinforce the language instruction.</p>
+<p>Example prompts:</p>
+<ul>
+<li>&quot;Please respond in English and only in English.&quot;</li>
+<li>&quot;Answer the following question in English: What is the weather like in Fresno?&quot;</li>
+</ul>
+<p>I ASKED THE MODEL WHEN ITS KNOWLEDGE CUTOFF IS AND IT GAVE ME A DIFFERENT ANSWER THAN WHAT IS ON THE AZURE OPENAI MODEL&#39;S PAGE.
+WHY DOES THIS HAPPEN?</p>
+<p>This is expected behavior. The models aren&#39;t able to answer questions about themselves. If you want to know when the knowledge
+cutoff for the model&#39;s training data is, consult the models page.</p>
+<p>I ASKED THE MODEL A QUESTION ABOUT SOMETHING THAT HAPPENED RECENTLY BEFORE THE KNOWLEDGE CUTOFF AND IT GOT THE ANSWER WRONG. WHY
+DOES THIS HAPPEN?</p>
+<p>This is expected behavior. First there&#39;s no guarantee that every recent event was part of the model&#39;s training data. And even when
+information was part of the training data, without using additional techniques like Retrieval Augmented Generation (RAG) to help
+ground the model&#39;s responses there&#39;s always a chance of ungrounded responses occurring. Both Azure OpenAI&#39;s use your data feature
+and Bing Chat use Azure OpenAI models combined with Retrieval Augmented Generation to help further ground model responses.</p>
+<p>The frequency that a given piece of information appeared in the training data can also impact the likelihood that the model will
+respond in a certain way.</p>
+<p>Asking the latest GPT-4 Turbo Preview model about something that changed more recently like &quot;Who is the prime minister of New
+Zealand?&quot;, is likely to result in the fabricated response Jacinda Ardern. However, asking the model &quot;When did Jacinda Ardern step
+down as prime minister?&quot; Tends to yield an accurate response which demonstrates training data knowledge going to at least January
+of 2023.</p>
+<p>So while it is possible to probe the model with questions to guess its training data knowledge cutoff, the model&#39;s page is the
+best place to check a model&#39;s knowledge cutoff.</p>
+<p>WHERE DO I ACCESS PRICING INFORMATION FOR LEGACY MODELS, WHICH ARE NO LONGER AVAILABLE FOR NEW DEPLOYMENTS?</p>
+<p>Legacy pricing information is available via a downloadable PDF file. For all other models, consult the official pricing page.</p>
+<p>HOW DO I FIX INTERNALSERVERERROR - 500 - FAILED TO CREATE COMPLETION AS THE MODEL GENERATED INVALID UNICODE OUTPUT?</p>
+<p>You can minimize the occurrence of these errors by reducing the temperature of your prompts to less than 1 and ensuring you&#39;re
+using a client with retry logic. Reattempting the request often results in a successful response.</p>
+<p>WE NOTICED CHARGES ASSOCIATED WITH API CALLS THAT FAILED TO COMPLETE WITH STATUS CODE 400. WHY ARE FAILED API CALLS GENERATING A
+CHARGE?</p>
+<p>If the service performs processing, you will be charged even if the status code is not successful (not 200). Common examples of
+this are, a 400 error due to a content filter or input limit, or a 408 error due to a time-out. Charges will also occur when a
+status 200 is received with a finish_reason of content_filter. In this case the prompt did not have any issues, but the completion
+generated by the model was detected to violate the content filtering rules, which result in the completion being filtered. If the
+service doesn&#39;t perform processing, you won&#39;t be charged. For example, a 401 error due to authentication or a 429 error due to
+exceeding the Rate Limit.</p>
+<p>GETTING ACCESS TO AZURE OPENAI SERVICE</p>
+<p>HOW DO I GET ACCESS TO AZURE OPENAI?</p>
+<p>A Limited Access registration form is not required to access most Azure OpenAI models. Learn more on the Azure OpenAI Limited
+Access page.</p>
+<p>MY GUEST ACCOUNT HAS BEEN GIVEN ACCESS TO AN AZURE OPENAI RESOURCE, BUT I&#39;M UNABLE TO ACCESS THAT RESOURCE IN THE <a href="HTTPS://AI.AZURE.COM/">AZURE AI
+FOUNDRY PORTAL</a>. HOW DO I ENABLE ACCESS?</p>
+<p>This is expected behavior when using the default sign-in experience for the Azure AI Foundry.</p>
+<p>To access Azure AI Foundry from a guest account that has been granted access to an Azure OpenAI resource:</p>
+<ol>
+<li>Open a private browser session and then navigate to <a href="https://ai.azure.com">https://ai.azure.com</a>.</li>
+<li>Rather than immediately entering your guest account credentials instead select Sign-in options</li>
+<li>Now select Sign in to an organization</li>
+<li>Enter the domain name of the organization that granted your guest account access to the Azure OpenAI resource.</li>
+<li>Now sign-in with your guest account credentials.</li>
+</ol>
+<p>You should now be able to access the resource via the Azure AI Foundry portal.</p>
+<p>Alternatively if you&#39;re signed into the Azure portal from the Azure OpenAI resource&#39;s Overview pane you can select Go to Azure AI
+Foundry to automatically sign in with the appropriate organizational context.</p>
+<p>LEARNING MORE AND WHERE TO ASK QUESTIONS</p>
+<p>WHERE CAN I READ ABOUT THE LATEST UPDATES TO AZURE OPENAI?</p>
+<p>For monthly updates, see our what&#39;s new page.</p>
+<p>WHERE CAN I GET TRAINING TO GET STARTED LEARNING AND BUILD MY SKILLS AROUND AZURE OPENAI?</p>
+<p>Check out our introduction to Azure OpenAI training course.</p>
+<p>WHERE CAN I POST QUESTIONS AND SEE ANSWERS TO OTHER COMMON QUESTIONS?</p>
+<ul>
+<li>We recommend posting questions on Microsoft Q&amp;A.</li>
+<li>Alternatively, you can post questions on Stack Overflow.</li>
+</ul>
+<p>WHERE DO I GO FOR AZURE OPENAI CUSTOMER SUPPORT?</p>
+<p>Azure OpenAI is part of Azure AI services. You can learn about all the support options for Azure AI services in the support and
+help options guide.</p>
+<p>MODELS AND FINE-TUNING</p>
+<p>WHAT MODELS ARE AVAILABLE?</p>
+<p>Consult the Azure OpenAI model availability guide.</p>
+<p>WHERE CAN I FIND OUT WHAT REGION A MODEL IS AVAILABLE IN?</p>
+<p>Consult the Azure OpenAI model availability guide for region availability.</p>
+<p>WHAT ARE THE SLAS (SERVICE LEVEL AGREEMENTS) IN AZURE OPENAI?</p>
+<p>We do offer an Availability SLA for all resources and a Latency SLA for Provisioned-Managed Deployments. For more information
+about the SLA for Azure OpenAI Service, see the Service Level Agreements (SLA) for Online Services page.</p>
+<p>HOW DO I ENABLE FINE-TUNING? CREATE A CUSTOM MODEL IS GREYED OUT IN <a href="HTTPS://AI.AZURE.COM/">AZURE AI FOUNDRY PORTAL</a>.</p>
+<p>In order to successfully access fine-tuning, you need Cognitive Services OpenAI Contributor assigned. Even someone with high-level
+Service Administrator permissions would still need this account explicitly set in order to access fine-tuning. For more
+information, please review the role-based access control guidance.</p>
+<p>WHAT IS THE DIFFERENCE BETWEEN A BASE MODEL AND A FINE-TUNED MODEL?</p>
+<p>A base model is a model that hasn&#39;t been customized or fine-tuned for a specific use case. Fine-tuned models are customized
+versions of base models where a model&#39;s weights are trained on a unique set of prompts. Fine-tuned models let you achieve better
+results on a wider number of tasks without needing to provide detailed examples for in-context learning as part of your completion
+prompt. To learn more, review our fine-tuning guide.</p>
+<p>WHAT IS THE MAXIMUM NUMBER OF FINE-TUNED MODELS I CAN CREATE?</p>
+<p>100</p>
+<p>WHY WAS MY FINE-TUNED MODEL DEPLOYMENT DELETED?</p>
+<p>If a customized (fine-tuned) model is deployed for more than 15 days during which no completions or chat completions calls are
+made to it, the deployment is automatically deleted (and no further hosting charges are incurred for that deployment). The
+underlying customized model remains available and can be redeployed at any time. To learn more, check out the how-to-article.</p>
+<p>HOW DO I DEPLOY A MODEL WITH THE REST API?</p>
+<p>There are currently two different REST APIs that allow model deployment. For the latest model deployment features such as the
+ability to specify a model version during deployment for models like text-embedding-ada-002 Version 2, use the Deployments -
+Create Or Update REST API call.</p>
+<p>CAN I USE QUOTA TO INCREASE THE MAX TOKEN LIMIT OF A MODEL?</p>
+<p>No, quota Tokens-Per-Minute (TPM) allocation isn&#39;t related to the max input token limit of a model. Model input token limits are
+defined in the models table and aren&#39;t impacted by changes made to TPM.</p>
+<p>GPT-4 TURBO WITH VISION</p>
+<p>CAN I FINE-TUNE THE IMAGE CAPABILITIES IN GPT-4?</p>
+<p>No, we don&#39;t support fine-tuning the image capabilities of GPT-4 at this time.</p>
+<p>CAN I USE GPT-4 TO GENERATE IMAGES?</p>
+<p>No, you can use dall-e-3 to generate images and gpt-4-vision-preview to understand images.</p>
+<p>WHAT TYPE OF FILES CAN I UPLOAD?</p>
+<p>We currently support PNG (.png), JPEG (.jpeg and .jpg), WEBP (.webp), and nonanimated GIF (.gif).</p>
+<p>IS THERE A LIMIT TO THE SIZE OF THE IMAGE I CAN UPLOAD?</p>
+<p>Yes, we restrict image uploads to 20 MB per image.</p>
+<p>CAN I DELETE AN IMAGE I UPLOADED?</p>
+<p>No, we&#39;ll delete the image for you automatically after it has been processed by the model.</p>
+<p>HOW DO THE RATE LIMITS FOR GPT-4 TURBO WITH VISION WORK?</p>
+<p>We process images at the token level, so each image we process counts towards your tokens per minute (TPM) limit. See the Image
+tokens section of the Overview for details on the formula used to determine token count per image.</p>
+<p>CAN GPT-4 TURBO WITH VISION UNDERSTAND IMAGE METADATA?</p>
+<p>No, the model doesn&#39;t receive image metadata.</p>
+<p>WHAT HAPPENS IF MY IMAGE IS UNCLEAR?</p>
+<p>If an image is ambiguous or unclear, the model will do its best to interpret it. However, the results might be less accurate. A
+good rule of thumb is that if an average human can&#39;t see the info in an image at the resolutions used in low/high res mode, then
+the model can&#39;t either.</p>
+<p>WHAT ARE THE KNOWN LIMITATIONS OF GPT-4 TURBO WITH VISION?</p>
+<p>See the limitations section of the GPT-4 Turbo with Vision concepts guide.</p>
+<p>I KEEP GETTING TRUNCATED RESPONSES WHEN I USE GPT-4 TURBO VISION MODELS. WHY IS THIS HAPPENING?</p>
+<p>By default GPT-4 vision-preview and GPT-4 turbo-2024-04-09 have a max_tokens value of 16. Depending on your request this value is
+often too low and can lead to truncated responses. To resolve this issue, pass a larger max_tokens value as part of your chat
+completions API requests. GPT-4o defaults to 4096 max_tokens.</p>
+<p>ASSISTANTS</p>
+<p>DO YOU STORE ANY DATA USED IN THE ASSISTANTS API?</p>
+<p>Yes. Unlike Chat Completions API, Azure OpenAI Assistants is a stateful API, meaning it retains data. There are two types of data
+stored in the Assistants API:</p>
+<ul>
+<li>Stateful entities: Threads, messages, and runs created during Assistants use.</li>
+<li>Files: Uploaded during Assistants setup or as part of a message.</li>
+</ul>
+<p>WHERE IS THIS DATA STORED?</p>
+<p>Data is stored in a secure, Microsoft-managed storage account that is logically separated.</p>
+<p>HOW LONG IS THIS DATA STORED?</p>
+<p>All used data persists in this system unless you explicitly delete this data. Use the delete function with the thread ID of the
+thread you want to delete. Clearing the Run in the Assistants Playground does not delete threads, however deleting them using
+delete function will not list them in the thread page.</p>
+<p>CAN I BRING MY OWN DATA STORE TO USE WITH ASSISTANTS?</p>
+<p>No. Currently Assistants supports only local files uploaded to the Assistants-managed storage. You cannot use your private storage
+account with Assistants.</p>
+<p>DOES ASSISTANTS SUPPORT CUSTOMER-MANAGED KEY ENCRYPTION (CMK)?</p>
+<p>Today we support CMK for Threads and Files in Assistants. See the What&#39;s new page for available regions for this feature.</p>
+<p>IS MY DATA USED BY MICROSOFT FOR TRAINING MODELS?</p>
+<p>No. Data is not used for Microsoft not used for training models. See the Responsible AI documentation for more information.</p>
+<p>WHERE IS DATA STORED GEOGRAPHICALLY?</p>
+<p>Azure OpenAI Assistants endpoints are regional, and data is stored in the same region as the endpoint. For more information, see
+the Azure data residency documentation.</p>
+<p>HOW AM I CHARGED FOR ASSISTANTS?</p>
+<ul>
+<li>Inference cost (input and output) of the base model you&#39;re using for each Assistant (for example gpt-4-0125). If you&#39;ve created
+multiple Assistants, you will be charged for the base model attached to each Assistant.</li>
+<li>If you&#39;ve enabled the Code Interpreter tool. For example if your assistant calls Code Interpreter simultaneously in two
+different threads, this would create two Code Interpreter sessions, each of which would be charged. Each session is active by
+default for one hour, which means that you would only pay this fee once if your user keeps giving instructions to Code
+Interpreter in the same thread for up to one hour.</li>
+<li>File search is billed based on the vector storage used.</li>
+</ul>
+<p>For more information, see the pricing page.</p>
+<p>IS THERE ANY ADDITIONAL PRICING OR QUOTA FOR USING ASSISTANTS?</p>
+<p>No. All quotas apply to using models with Assistants.</p>
+<p>DOES THE ASSISTANTS API SUPPORT NON-AZURE OPENAI MODELS?</p>
+<p>Assistants API only supports Azure OpenAI models.</p>
+<p>IS THE ASSISTANTS API GENERALLY AVAILABLE?</p>
+<p>The Assistants API is currently in public preview. Stay informed of our latest product updates by regularly visiting our What&#39;s
+New page.</p>
+<p>WHAT ARE SOME EXAMPLES OR OTHER RESOURCES I CAN USE TO LEARN ABOUT ASSISTANTS?</p>
+<p>See the Conceptual, quickstart, how-to articles for information on getting started and using Assistants. You can also check out
+Azure OpenAI Assistants code samples on GitHub.</p>
+<p>WEB APP</p>
+<p>HOW CAN I CUSTOMIZE MY PUBLISHED WEB APP?</p>
+<p>You can customize your published web app in the Azure portal. The source code for the published web app is available on GitHub,
+where you can find information on changing the app frontend, as well as instructions for building and deploying the app.</p>
+<p>WILL MY WEB APP BE OVERWRITTEN WHEN I DEPLOY THE APP AGAIN FROM THE <a href="HTTPS://AI.AZURE.COM/">AZURE AI FOUNDRY PORTAL</a>?</p>
+<p>Your app code won&#39;t be overwritten when you update your app. The app will be updated to use the Azure OpenAI resource, Azure AI
+Search index (if you&#39;re using Azure OpenAI on your data), and model settings selected in the Azure AI Foundry portal without any
+change to the appearance or functionality.</p>
+<p>USING YOUR DATA</p>
+<p>WHAT IS AZURE OPENAI ON YOUR DATA?</p>
+<p>Azure OpenAI on your data is a feature of the Azure OpenAI Services that helps organizations to generate customized insights,
+content, and searches using their designated data sources. It works with the capabilities of the OpenAI models in Azure OpenAI to
+provide more accurate and relevant responses to user queries in natural language. Azure OpenAI on your data can be integrated with
+customer&#39;s existing applications and workflows, offers insights into key performance indicators, and can interact with users
+seamlessly.</p>
+<p>HOW CAN I ACCESS AZURE OPENAI ON YOUR DATA?</p>
+<p>All Azure OpenAI customers can use Azure OpenAI on your data via the Azure AI Foundry portal and Rest API.</p>
+<p>WHAT DATA SOURCES DOES AZURE OPENAI ON YOUR DATA SUPPORT?</p>
+<p>Azure OpenAI on your data supports ingestion from Azure AI Search, Azure Blob Storage, and uploading local files. You can learn
+more about Azure OpenAI on your data from the conceptual article and quickstart.</p>
+<p>HOW MUCH DOES IT COST TO USE AZURE OPENAI ON YOUR DATA?</p>
+<p>When using Azure OpenAI on your data, you incur costs when you use Azure AI Search, Azure Blob Storage, Azure Web App Service,
+semantic search and OpenAI models. There&#39;s no additional cost for using the &quot;your data&quot; feature in the Azure AI Foundry portal.</p>
+<p>HOW CAN I CUSTOMIZE OR AUTOMATE THE INDEX CREATION PROCESS?</p>
+<p>You can prepare the index yourself using a script provided on GitHub. Using this script will create an Azure AI Search index with
+all the information needed to better use your data, with your documents broken down into manageable chunks. See the README file
+with the data preparation code for details on how to run it.</p>
+<p>HOW CAN I UPDATE MY INDEX?</p>
+<p>You can schedule an automatic index refresh, or upload additional data to your Azure Blob Container and use it as your data source
+when you create a new index. The new index will include all of the data in your container.</p>
+<p>WHAT FILE TYPES DOES AZURE OPENAI ON YOUR DATA SUPPORT?</p>
+<p>See Using your data for more information on supported file types.</p>
+<p>IS RESPONSIBLE AI SUPPORTED BY AZURE OPENAI ON YOUR DATA?</p>
+<p>Yes, Azure OpenAI on your data is part of the Azure OpenAI Service and works with the models available in Azure OpenAI. The
+content filtering and abuse monitoring features of Azure OpenAI still apply. For more information, see the overview of Responsible
+AI practices for Azure OpenAI models and the Transparency Note for Azure OpenAI for extra guidance on using Azure OpenAI on your
+data responsibly.</p>
+<p>IS THERE A TOKEN LIMIT ON THE SYSTEM MESSAGE?</p>
+<p>Yes, the token limit on the system message is 400. If the system message is more than 400 tokens, the rest of the tokens beyond
+the first 400 will be ignored. This limitation only applies to the Azure OpenAI on your data feature.</p>
+<p>DOES AZURE OPENAI ON YOUR DATA SUPPORT FUNCTION CALLING?</p>
+<p>Azure OpenAI on your data currently doesn&#39;t support function calling.</p>
+<p>DOES THE QUERY LANGUAGE AND THE DATA SOURCE LANGUAGE NEED TO BE THE SAME?</p>
+<p>You must send queries in the same language of your data. Your data can be in any of the languages supported by Azure AI Search.</p>
+<p>IF SEMANTIC SEARCH IS ENABLED FOR MY AZURE AI SEARCH RESOURCE, WILL IT BE AUTOMATICALLY APPLIED TO AZURE OPENAI ON YOUR DATA IN
+THE <a href="HTTPS://AI.AZURE.COM/">AZURE AI FOUNDRY PORTAL</a>?</p>
+<p>When you select &quot;Azure AI Search&quot; as the data source, you can choose to apply semantic search. If you select &quot;Azure Blob
+Container&quot; or &quot;Upload files&quot; as the data source, you can create the index as usual. Afterwards you would reingest the data using
+the &quot;Azure AI Search&quot; option to select the same index and apply Semantic Search. You will then be ready to chat on your data with
+semantic search applied.</p>
+<p>HOW CAN I ADD VECTOR EMBEDDINGS WHEN INDEXING MY DATA?</p>
+<p>When you select &quot;Azure Blob Container&quot;, &quot;Azure AI Search&quot;, or &quot;Upload files&quot; as the data source, you can also select an Ada
+embedding model deployment to use when ingesting your data. This will create an Azure AI Search index with vector embeddings.</p>
+<p>WHY IS INDEX CREATION FAILING AFTER I ADDED AN EMBEDDING MODEL?</p>
+<p>Index creation can fail when adding embeddings to your index if the rate limit on your Ada embedding model deployment is too low,
+or if you have a very large set of documents. You can use this script provided on GitHub to create the index with embeddings
+manually.</p>
+<p>CUSTOMER COPYRIGHT COMMITMENT</p>
+<p>HOW DO I OBTAIN COVERAGE UNDER THE CUSTOMER COPYRIGHT COMMITMENT?</p>
+<p>The Customer Copyright Commitment is a provision to be included in the December 1, 2023, Microsoft Product Terms that describes
+Microsoft’s obligation to defend customers against certain third-party intellectual property claims relating to Output Content. If
+the subject of the claim is Output Content generated from the Azure OpenAI Service (or any other Covered Product that allows
+customers to configure the safety systems), then to receive coverage, customer must have implemented all mitigations required by
+the Azure OpenAI Service documentation in the offering that delivered the Output Content. The required mitigations are documented
+here and updated on an ongoing basis. For new services, features, models, or use cases, new CCC requirements will be posted and
+take effect at or following the launch of such service, feature, model, or use case. Otherwise, customers will have six months
+from the time of publication to implement new mitigations to maintain coverage under the CCC. If a customer tenders a claim, the
+customer will be required to demonstrate compliance with the relevant requirements. These mitigations are required for Covered
+Products that allow customers to configure the safety systems, including Azure OpenAI Service; they do not impact coverage for
+customers using other Covered Products.</p>
+<p>NEXT STEPS</p>
+<ul>
+<li>Azure OpenAI quotas and limits</li>
+<li>Azure OpenAI what&#39;s new</li>
+<li>Azure OpenAI quickstarts</li>
+</ul>
+
+          </div>
+        </body>
+        </html>
+      
